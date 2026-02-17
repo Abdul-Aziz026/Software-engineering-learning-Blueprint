@@ -10,7 +10,7 @@ export class DashboardService {
     private baseUrl:string = 'http://localhost:5000/api/Home/dashboard';
     constructor(private http: HttpClient){}
 
-    getGreetMessage(): Observable<string> {
-        return this.http.get(this.baseUrl, { responseType: 'text' });
+    getGreetMessage(): Observable<any> {
+        return this.http.get<any>(this.baseUrl);
     }
 }

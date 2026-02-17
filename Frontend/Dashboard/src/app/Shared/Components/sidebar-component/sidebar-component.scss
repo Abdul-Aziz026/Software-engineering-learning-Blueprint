@@ -1,0 +1,58 @@
+.sidebar {
+  width: 220px;
+  background-color: #1f2937; /* dark gray */
+  color: #f8fafc; /* light text */
+  height: 100vh;
+  padding: 20px 10px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.sidebar-section {
+  margin-bottom: 25px;
+}
+
+.section-label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #94a3b8; /* lighter gray */
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1; /* light gray */
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-item span {
+  font-size: 16px; /* emoji icon size */
+}
+
+.nav-item:hover {
+  background-color: #334155; /* slightly darker on hover */
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background-color: #2563eb; /* blue for active page */
+  color: white;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 3px;
+}

@@ -18,6 +18,8 @@ public class HomeController : Controller
     [HttpGet("dashboard")]
     public async Task<IActionResult> GetDashboard()
     {
-        return Ok("Hello Welcome to My Software engineering blueprint");
+        return Ok( new {
+            message = "Hello Welcome to My Software engineering blueprint"
+        });
     }
 }

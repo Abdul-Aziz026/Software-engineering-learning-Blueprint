@@ -1,0 +1,87 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: #1f2937; /* dark background */
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.logo-icon {
+  font-size: 22px;
+}
+
+/* Tech Nav Links */
+.tech-nav {
+  display: flex;
+  gap: 15px;
+}
+
+.tech-link {
+  color: #cbd5e1; /* light gray */
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tech-link:hover {
+  background-color: #334155; /* darker hover */
+  color: #f8fafc; /* white */
+}
+
+.tech-link.active {
+  background-color: #2563eb; /* blue active */
+  color: white;
+}
+
+/* Auth Buttons */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-outline {
+  color: #2563eb; /* blue */
+  border: 1px solid #2563eb;
+  padding: 6px 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-outline:hover {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-solid {
+  background-color: #2563eb;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-solid:hover {
+  background-color: #1d4ed8; /* darker blue */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tech-nav {
+    display: none; /* hide tech links on mobile */
+  }
+}
