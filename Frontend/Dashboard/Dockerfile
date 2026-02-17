@@ -21,4 +21,5 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
 
-# build: docker build -t Dashboard
+# build: docker build -t angularImage .
+# run: docker run -d -p 8080:80 --name dashboard angularImage
