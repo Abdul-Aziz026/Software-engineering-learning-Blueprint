@@ -8,7 +8,6 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class HomeController : Controller
 {
-
     public HomeController()
     {
     }
