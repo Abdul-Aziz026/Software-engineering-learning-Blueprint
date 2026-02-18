@@ -37,13 +37,9 @@
 }
 
 .tech-link:hover {
-  background-color: #334155; /* darker hover */
+  background-color: #2563eb; /* darker hover */
   color: #f8fafc; /* white */
-}
-
-.tech-link.active {
-  background-color: #2563eb; /* blue active */
-  color: white;
+  cursor: pointer;
 }
 
 /* Auth Buttons */
@@ -52,8 +48,8 @@
   gap: 10px;
 }
 
-.btn-outline {
-  color: #2563eb; /* blue */
+.auth-button {
+  color: #f8fafc; /* blue */
   border: 1px solid #2563eb;
   padding: 6px 14px;
   border-radius: 4px;
@@ -61,23 +57,12 @@
   transition: background 0.2s, color 0.2s;
 }
 
-.btn-outline:hover {
+.auth-button:hover {
   background-color: #2563eb;
   color: white;
+  cursor: pointer;
 }
 
-.btn-solid {
-  background-color: #2563eb;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.btn-solid:hover {
-  background-color: #1d4ed8; /* darker blue */
-}
 
 /* Responsive */
 @media (max-width: 768px) {
