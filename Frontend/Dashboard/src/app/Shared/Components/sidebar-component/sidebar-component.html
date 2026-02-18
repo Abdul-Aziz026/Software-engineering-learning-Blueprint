@@ -1,49 +1,16 @@
 <aside class="sidebar">
-  <div class="sidebar-section">
-    <div class="section-label">ASP.NET Core</div>
-    <a class="nav-item" routerLink="/aspnet/intro" routerLinkActive="active">
-      <span>📘</span> Introduction
-    </a>
-    <a class="nav-item" routerLink="/aspnet/routing" routerLinkActive="active">
-      <span>🔀</span> Routing
-    </a>
-    <a class="nav-item" routerLink="/aspnet/middleware" routerLinkActive="active">
-      <span>🔧</span> Middleware
-    </a>
-    <a class="nav-item" routerLink="/aspnet/ef-core" routerLinkActive="active">
-      <span>🗄️</span> EF Core
-    </a>
-    <a class="nav-item" routerLink="/aspnet/auth" routerLinkActive="active">
-      <span>🔐</span> Authentication
-    </a>
-  </div>
-
-  <div class="sidebar-section">
-    <div class="section-label">Angular</div>
-    <a class="nav-item" routerLink="/angular/intro" routerLinkActive="active">
-      <span>📗</span> Introduction
-    </a>
-    <a class="nav-item" routerLink="/angular/components" routerLinkActive="active">
-      <span>🧩</span> Components
-    </a>
-    <a class="nav-item" routerLink="/angular/services" routerLinkActive="active">
-      <span>⚙️</span> Services
-    </a>
-    <a class="nav-item" routerLink="/angular/routing" routerLinkActive="active">
-      <span>🔀</span> Routing
-    </a>
-  </div>
-
-  <div class="sidebar-section">
-    <div class="section-label">Docker</div>
-    <a class="nav-item" routerLink="/docker/intro" routerLinkActive="active">
-      <span>📙</span> Introduction
-    </a>
-    <a class="nav-item" routerLink="/docker/compose" routerLinkActive="active">
-      <span>🐳</span> Docker Compose
-    </a>
-    <a class="nav-item" routerLink="/docker/deploy" routerLinkActive="active">
-      <span>🚀</span> Deployment
-    </a>
-  </div>
+  <h3>{{ courseData?.title }}</h3>
+  <nav>
+    <div *ngFor="let chapter of courseData?.chapters" class="chapter">
+      <div class="chapter-title">{{ chapter.name }}</div>
+      <ul>
+        <li *ngFor="let lesson of chapter.lessons">
+          <!-- <a [routerLink]="['/course', courseId, 'lesson', lesson.id]"  -->
+             routerLinkActive="active">
+            {{ lesson.title }}
+          <!-- </a> -->
+        </li>
+      </ul>
+    </div>
+  </nav>
 </aside>

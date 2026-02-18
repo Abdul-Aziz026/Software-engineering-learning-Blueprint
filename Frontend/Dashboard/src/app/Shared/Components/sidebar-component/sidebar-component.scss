@@ -1,58 +1,42 @@
 .sidebar {
-  width: 220px;
-  background-color: #1f2937; /* dark gray */
-  color: #f8fafc; /* light text */
-  height: 100vh;
-  padding: 20px 10px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  overflow-y: auto;
-  font-family: 'Segoe UI', sans-serif;
+  width: 280px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-right: 1px solid #ddd;
 }
 
-.sidebar-section {
-  margin-bottom: 25px;
+.chapter {
+  margin-bottom: 20px;
 }
 
-.section-label {
+.chapter-title {
   font-weight: bold;
-  font-size: 14px;
-  color: #94a3b8; /* lighter gray */
   margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 8px;
+  background: #e9ecef;
 }
 
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #cbd5e1; /* light gray */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 5px 0;
+}
+
+a {
+  display: block;
+  padding: 8px 12px;
   text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: background-color 0.2s, color 0.2s;
+  color: #333;
 }
 
-.nav-item span {
-  font-size: 16px; /* emoji icon size */
+a:hover {
+  background: #e9ecef;
 }
 
-.nav-item:hover {
-  background-color: #334155; /* slightly darker on hover */
-  color: #ffffff;
-}
-
-.nav-item.active {
-  background-color: #2563eb; /* blue for active page */
+a.active {
+  background: #007bff;
   color: white;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.2);
-  border-radius: 3px;
 }
