@@ -7,14 +7,6 @@ builder.Services.AddConfigurationSettings(builder.Configuration);
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 
-
-builder.Services.AddControllers();
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
-
-// Register the background service
-builder.Services.AddHostedService<HeartbitTestJob>();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
@@ -25,6 +17,14 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+
+builder.Services.AddControllers();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
+
+// Register the background service
+builder.Services.AddHostedService<HeartbitTestJob>();
+
 var app = builder.Build();
 app.UseCors("AllowAngular");
 

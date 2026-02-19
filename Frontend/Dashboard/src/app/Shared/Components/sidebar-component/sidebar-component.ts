@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { CourseService } from '../../../Features/Courses/Services/course.service';
 // import { CourseService } from 'src/app/services/course.service';
 
 @Component({
@@ -13,7 +14,7 @@ export class SidebarComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    // private courseService: CourseService
+    private courseService: CourseService
   ) {}
 
   ngOnInit() {
@@ -24,8 +25,13 @@ export class SidebarComponent implements OnInit {
   }
 
   loadCourseData() {
-    // this.courseService.getCourseStructure(this.courseId).subscribe(data => {
-    //   this.courseData = data;
-    // });
+    this.courseService.getCourseStructure(this.courseId).subscribe({
+      next: (data) => {
+        this.courseData = data;
+      },
+      error: (err) => {
+        console.error('Error loading course:', err);
+      }
+    });
   }
 }
