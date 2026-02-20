@@ -1,37 +1,53 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CourseService } from '../../../Features/Courses/Services/course.service';
+import { ChapterService } from '../../../Features/Courses/Services/chapter.service';
+import { Chapter } from '../../../Features/Courses/Models/chapter.model';
 // import { CourseService } from 'src/app/services/course.service';
 
 @Component({
   selector: 'app-sidebar-component',
+  standalone: true,
+  imports: [
+    RouterLink
+  ],
   templateUrl: './sidebar-component.html',
   styleUrls: ['./sidebar-component.scss']
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent implements OnChanges {
   courseData: any;
-  courseId: string = '';
+  @Input() courseId!: string;
 
   constructor(
     private route: ActivatedRoute,
-    private courseService: CourseService
+    private chapterservice: ChapterService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.courseId = params['id'];
+  ngOnChanges() {
+    if (this.courseId) {
       this.loadCourseData();
-    });
+    }
   }
 
   loadCourseData() {
-    this.courseService.getCourseStructure(this.courseId).subscribe({
+    this.chapterservice.getChaptersBySubject(this.courseId).subscribe({
       next: (data) => {
-        this.courseData = data;
+        // Initialize expanded property for each chapter
+        this.courseData = data.map(chapter => ({
+          ...chapter,
+          expanded: false // or true if you want them expanded by default
+        }));
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading course:', err);
       }
     });
+  }
+
+  toggleChapter(chapter: Chapter) {
+    chapter.expanded = !chapter.expanded;
+    this.cdr.detectChanges();
   }
 }

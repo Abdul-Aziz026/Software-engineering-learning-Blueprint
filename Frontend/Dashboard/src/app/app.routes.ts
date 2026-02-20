@@ -14,7 +14,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'course/:id',
+    path: 'course',
     component: CourseLayoutComponent,
     children: [
       {

@@ -1,26 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CourseService } from '../../Services/course.service';
 
 @Component({
-  selector: 'app-course-component',
+  selector: 'app-lesson-component',
   standalone: true,
   imports: [],
-  templateUrl: './course-component.html',
-  styleUrl: './course-component.scss',
+  templateUrl: './lesson-component.html',
+  styleUrl: './lesson-component.scss',
 })
-export class CourseComponent implements OnInit {
+export class LessonComponent implements OnInit {
   course: any;
   loading = true;
 
   constructor(
     private route: ActivatedRoute,
-    private courseService: CourseService
+    private courseService: CourseService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
-    const courseId = this.route.parent?.snapshot.params['id'];
-    this.loadCourse(courseId);
+    this.route.params.subscribe(params => {
+      this.loadCourse(params['id']);
+    });
   }
 
   loadCourse(id: string) {
@@ -28,6 +30,7 @@ export class CourseComponent implements OnInit {
       next: (data) => {
         this.course = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading course:', err);
