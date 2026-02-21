@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import { environment } from 'src/environments/environment';
+import { ConfigService } from "../../../Core/Services/config.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CourseService {
+  private apiUrl: string;
 
-  private apiUrl = 'http://localhost:5000' + '/api/course';
-
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private configService: ConfigService) {
+    this.apiUrl = this.configService.baseUrl + '/course';
+  }
 
   getCourseStructure(courseId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${courseId}/structure`);

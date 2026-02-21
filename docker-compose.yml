@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build:
+      context: ./Frontend/Dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    container_name: dashboard-frontend
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: API/Dockerfile
+    ports:
+      - "5000:8080"
+    container_name: api-backend
+  

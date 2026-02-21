@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from '../header-component/header-component';
 import { FooterComponent } from '../footer-component/footer-component';
 import { SidebarComponent } from '../sidebar-component/sidebar-component';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-course-layout-component',

@@ -6,7 +6,7 @@ RUN npm ci
 RUN npm install -g @angular/cli
 COPY . .
 
-RUN npm run build --configuration=production
+RUN npm run build -- --configuration=production
 
 # stage 2: 
 FROM nginx:alpine
@@ -21,5 +21,6 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
 
-# build: docker build -t frontend .
-# run: docker run -d -p 8080:80 --name dashboard frontend
+# build: docker build -t frontend . 
+# build: docker build --no-cache -t frontend .
+# run: docker run -d -p 4200:80 --name dashboard frontend:1.0

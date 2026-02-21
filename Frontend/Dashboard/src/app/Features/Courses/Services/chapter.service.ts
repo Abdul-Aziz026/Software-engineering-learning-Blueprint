@@ -2,15 +2,18 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Chapter } from "../Models/chapter.model";
+import { ConfigService } from "../../../Core/Services/config.service";
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 
 export class ChapterService {
-    private apiUrl = 'http://localhost:5000/api/Chapters';
+    private apiUrl: string;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private configService: ConfigService) {
+        this.apiUrl = this.configService.baseUrl + '/Chapters';
+    }
 
     getAllChapters(): Observable<Chapter[]> {
         return this.http.get<Chapter[]>(this.apiUrl);

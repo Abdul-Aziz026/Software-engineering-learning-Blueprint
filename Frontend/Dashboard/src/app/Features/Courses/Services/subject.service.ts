@@ -2,15 +2,18 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Subject } from "../Models/subject.model";
+import { ConfigService } from "../../../Core/Services/config.service";
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 
 export class SubjectService {
-    private apiUrl = 'http://localhost:5000/api/Course';
+    private apiUrl: string;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private configService: ConfigService) {
+        this.apiUrl = this.configService.baseUrl + '/Course';
+    }
 
     getAllSubjects(): Observable<Subject[]> {
         return this.http.get<Subject[]>(this.apiUrl);

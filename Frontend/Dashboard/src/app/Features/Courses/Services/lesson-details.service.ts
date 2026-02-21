@@ -2,15 +2,18 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { LessonDetails } from "../Models/lesson-details.model";
+import { ConfigService } from "../../../Core/Services/config.service";
 
-@Injectable ({
+@Injectable({
     providedIn: 'root'
 })
 
 export class LessonDetailsService {
-    private apiUrl = 'http://localhost:5000/api';
+    private apiUrl: string;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private configService: ConfigService) {
+        this.apiUrl = this.configService.baseUrl;
+    }
 
     getLessonDetailsByLessonId(subjectId: string, lessonId: string): Observable<LessonDetails> {
         return this.http.get<LessonDetails>(`${this.apiUrl}/LessonDetails/${subjectId}/lesson/${lessonId}`);

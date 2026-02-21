@@ -2,7 +2,7 @@
 # Stage 1: Base image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 5000
 
 # -----------------------------------------------
 # Stage 2: Build image
@@ -41,11 +41,10 @@ ENTRYPOINT ["dotnet", "API.dll"]
 
 
 # docker run command from root sln folder
-# docker build -f API/Dockerfile -t my-api .
+# docker build -f API/Dockerfile -t backend:1.0 .
 
 # image run command:
-# docker run -d -p 8080:8080 --name my-api-container my-api
-
+# docker run -d -p 5000:8080 --name api-backend backend:1.0
 # get request
 # http://localhost:8080/api/Home/dashboard
 # return response
