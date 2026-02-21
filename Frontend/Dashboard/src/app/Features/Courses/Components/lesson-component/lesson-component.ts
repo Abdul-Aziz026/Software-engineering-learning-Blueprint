@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { CourseService } from '../../Services/course.service';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
+import { LessonDetailsService } from '../../Services/lesson-details.service';
+import { LessonDetails } from '../../Models/lesson-details.model';
 
 @Component({
   selector: 'app-lesson-component',
@@ -9,33 +9,26 @@ import { CourseService } from '../../Services/course.service';
   templateUrl: './lesson-component.html',
   styleUrl: './lesson-component.scss',
 })
-export class LessonComponent implements OnInit {
-  course: any;
-  loading = true;
+export class LessonComponent implements OnChanges{
+  @Input() id: string = '';
+  @Input() lessonId: string = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private courseService: CourseService,
-    private cdr: ChangeDetectorRef
+  lessonDetails: LessonDetails | undefined;
+
+  constructor(private lessonDetailsService: LessonDetailsService,
+              private cdr: ChangeDetectorRef
   ) { }
 
-  ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.loadCourse(params['id']);
-    });
-  }
-
-  loadCourse(id: string) {
-    this.courseService.getCourseById(id).subscribe({
-      next: (data) => {
-        this.course = data;
-        this.loading = false;
+  ngOnChanges(): void {
+    this.lessonDetailsService.getLessonDetailsByLessonId(this.id, this.lessonId).subscribe({
+      next: (res) => {
+        this.lessonDetails = res;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading course:', err);
-        this.loading = false;
+        console.error("error: ", err);
       }
     });
   }
+
 }

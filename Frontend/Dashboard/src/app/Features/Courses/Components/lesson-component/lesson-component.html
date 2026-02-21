@@ -1,29 +1,35 @@
-@if (!loading) {
-<div class="course-container">
-  <div class="course-header">
-    <h1>{{ course.title }}</h1>
-    <p class="description">{{ course.description }}</p>
-  </div>
+<div class="lesson-container">
+  <div class="lesson-content">
+    <!-- Lesson Header -->
+    <header class="lesson-header">
+      <h1>{{ lessonDetails?.title }}</h1>
+    </header>
 
-  <div class="course-info">
-    <span>Duration: {{ course.duration }}</span>
-    <span>Level: {{ course.level }}</span>
-  </div>
+    <!-- Lesson Body -->
+    <article class="lesson-body">
+      <p>{{ lessonDetails?.description }}</p>
+    </article>
 
-  <div class="course-content">
-    <h2>Course Content</h2>
-    @for (chapter of course?.chapters; track $index) {
-    <div class="chapter-item">
-      <h3>{{ chapter.name }}</h3>
-      <p>{{ chapter.lessons?.length }} lessons</p>
-    </div>
+    <!-- Reference Links -->
+    @if (lessonDetails?.referenceUrls && lessonDetails?.referenceUrls!.length > 0) {
+      <aside class="lesson-references">
+        <h3>📚 Reference Materials</h3>
+        <ul>
+          @for (url of lessonDetails?.referenceUrls; track $index) {
+            <li>
+              <a [href]="url" target="_blank" rel="noopener noreferrer">
+                {{ url }}
+              </a>
+            </li>
+          }
+        </ul>
+      </aside>
     }
+
+    <!-- Navigation Buttons -->
+    <footer class="lesson-footer">
+      <button class="btn btn-secondary">← Previous Lesson</button>
+      <button class="btn btn-primary">Next Lesson →</button>
+    </footer>
   </div>
 </div>
-}
-
-@if (loading) {
-<div class="loading">
-  Loading course...
-</div>
-}

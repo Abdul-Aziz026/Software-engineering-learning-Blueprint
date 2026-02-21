@@ -8,12 +8,12 @@ import { LessonDetails } from "../Models/lesson-details.model";
 })
 
 export class LessonDetailsService {
-    private apiUrl = 'http://localhost:5000' + '/api/lessondetails';
+    private apiUrl = 'http://localhost:5000/api';
 
     constructor(private http: HttpClient) { }
 
-    getLessonDetailsByLessonId(lessonId: string): Observable<LessonDetails> {
-        return this.http.get<LessonDetails>(`${this.apiUrl}/lesson/${lessonId}`);
+    getLessonDetailsByLessonId(subjectId: string, lessonId: string): Observable<LessonDetails> {
+        return this.http.get<LessonDetails>(`${this.apiUrl}/LessonDetails/${subjectId}/lesson/${lessonId}`);
     }
 
     getLessonDetailsById(id: string): Observable<LessonDetails> {

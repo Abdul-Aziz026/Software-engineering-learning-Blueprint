@@ -10,25 +10,26 @@ public class CourseController : ControllerBase
     {
         new SubjectResponseDto
         {
-            Id = "123",
+            Id = "csharp",
             Name = "C#",
-            Description = "C# Fundametals of beginneer to intermediate"
+            Description = "C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of " +
+            "beginneer to intermediate C# Fundametals of beginneer to intermediate"
         },
         new SubjectResponseDto
         {
-            Id = "1234",
+            Id = "asp_net_core",
             Name = "Asp.net Core",
             Description = "Asp.net Core Fundametals of beginneer to intermediate"
         },
         new SubjectResponseDto
         {
-            Id = "12345",
+            Id = "docker",
             Name = "Docker File",
             Description = "Docker File Fundametals of beginneer to intermediate"
         },
         new SubjectResponseDto
         {
-            Id = "123456",
+            Id = "angular",
             Name = "Angular",
             Description = "Angular Fundametals of beginneer to intermediate"
         },

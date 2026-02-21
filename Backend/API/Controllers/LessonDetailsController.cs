@@ -7,15 +7,15 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class LessonDetailsController : ControllerBase
 {
-    [HttpGet("lesson/{lessonId}")]
-    public async Task<ActionResult<LessonDetails>> GetLessonDetailsByLessonId(string lessonId)
+    [HttpGet("{subjectId}/lesson/{lessonId}")]
+    public async Task<ActionResult<LessonDetails>> GetLessonDetailsByLessonId(string subjectId, string lessonId)
     {
         var lessonDetails = new LessonDetails
         {
             Id = "1",
             LessonId = lessonId,
             Title = "Introduction to Linear Equations",
-            Description = "Learn the fundamentals of linear equations and how to solve them.",
+            Description = "Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them Learn the fundamentals of linear equations and how to solve them .",
             ReferenceUrls = new List<string>
             {
                 "https://example.com/linear-equations",
