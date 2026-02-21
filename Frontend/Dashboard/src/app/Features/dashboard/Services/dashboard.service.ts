@@ -12,7 +12,7 @@ export class DashboardService {
   constructor(private http: HttpClient,
     private configService: ConfigService
   ) {
-    this.baseUrl = this.configService.baseUrl + 'Home/dashboard';
+    this.baseUrl = this.configService.baseUrl + '/Home/dashboard';
   }
 
   getGreetMessage(): Observable<any> {

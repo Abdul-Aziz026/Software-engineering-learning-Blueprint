@@ -21,6 +21,6 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
 
-# build: docker build -t frontend . 
+# build: docker build -t frontend .
 # build: docker build --no-cache -t frontend .
 # run: docker run -d -p 4200:80 --name dashboard frontend:1.0
