@@ -1,15 +1,17 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject } from '../../Models/subject.model';
 import { SubjectService } from '../../Services/subject.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-subjects-component',
+  standalone: true,
   imports: [FormsModule],
   templateUrl: './subjects-component.html',
   styleUrl: './subjects-component.scss',
 })
-export class SubjectsComponent implements OnInit{
+export class SubjectsComponent implements OnInit {
   subjects: Subject[] = [];
   selectedSubject: Subject | null = null;
   isEditing = false;
@@ -22,7 +24,12 @@ export class SubjectsComponent implements OnInit{
   };
 
   constructor(private subjectService: SubjectService,
-              private cdr: ChangeDetectorRef) {}
+    private cdr: ChangeDetectorRef,
+    private router: Router) { }
+
+  navigateToAddLesson(subjectId: string) {
+    this.router.navigate(['/course/lesson/create'], { queryParams: { subjectId: subjectId } });
+  }
 
   ngOnInit(): void {
     this.loadSubjects();
@@ -52,7 +59,7 @@ export class SubjectsComponent implements OnInit{
     this.newSubject = { id: '', name: '', description: '' };
   }
 
-  createSubject() : void{
+  createSubject(): void {
     this.subjectService.createSubject(this.newSubject).subscribe({
       next: () => {
         this.loadSubjects();
@@ -65,7 +72,7 @@ export class SubjectsComponent implements OnInit{
     })
   }
 
-  deleteSubject(subjectId: string) : void {
+  deleteSubject(subjectId: string): void {
     if (confirm('Are you sure you want to delete this subject?')) {
       this.subjectService.deleteSubject(subjectId).subscribe({
         next: () => {

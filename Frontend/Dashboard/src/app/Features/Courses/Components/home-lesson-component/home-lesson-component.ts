@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from '../../Services/course.service';
 import { Subject } from '../../Models/subject.model';
+import { ChapterService } from '../../Services/chapter.service';
 
 @Component({
   selector: 'app-lesson-component',
@@ -12,15 +13,19 @@ import { Subject } from '../../Models/subject.model';
 })
 export class HomeLessonComponent implements OnInit {
   subject?: Subject;
+  courseId: string = '';
 
   constructor(private route: ActivatedRoute,
-              private courseService: CourseService,
-              private cdr: ChangeDetectorRef
-  ) {}
+    private courseService: CourseService,
+    private chapterService: ChapterService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.loadSubjectData(params['id']);
+      this.courseId = params['id'];
+      this.loadSubjectData(this.courseId);
     });
   }
 
@@ -34,15 +39,28 @@ export class HomeLessonComponent implements OnInit {
         console.error('error ', err);
       }
     });
-    // Your API call here
-    this.subject = {
-      id: "1",
-      name: "Mathematics",
-      description: "Mathematics is the study of numbers, quantities, and shapes. In this course, you will learn fundamental concepts including algebra, geometry, and calculus that form the foundation of mathematical thinking."
-    };
   }
 
   startLearning(): void {
+    if (!this.courseId) return;
 
+    this.chapterService.getChaptersBySubject(this.courseId).subscribe({
+      next: (chapters) => {
+        if (chapters && chapters.length > 0) {
+          const firstChapter = chapters[0];
+          if (firstChapter.lessons && firstChapter.lessons.length > 0) {
+            const firstLessonId = firstChapter.lessons[0].id;
+            this.router.navigate(['/course', this.courseId, 'lesson', firstLessonId]);
+          } else {
+            console.warn('No lessons found in the first chapter.');
+          }
+        } else {
+          console.warn('No chapters found for this subject.');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching chapters:', err);
+      }
+    });
   }
 }

@@ -1,0 +1,189 @@
+.lesson-create-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    padding: 2.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    .card-header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #f8f9fa;
+      padding-bottom: 1.5rem;
+
+      h2 {
+        font-size: 1.75rem;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      p {
+        color: #666;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .lesson-form {
+    .form-section {
+      margin-bottom: 2.5rem;
+
+      h3 {
+        font-size: 1.1rem;
+        color: #4a90e2;
+        margin-bottom: 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+    }
+
+    .row {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+
+      .col {
+        flex: 1;
+        min-width: 250px;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 1.5px solid #e1e4e8;
+        border-radius: 8px;
+        background: #fcfcfc;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #4a90e2;
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        }
+
+        &::placeholder {
+          color: #adb5bd;
+        }
+      }
+
+      textarea.form-control {
+        resize: vertical;
+      }
+
+      .error {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+      }
+    }
+
+    .url-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+
+      .btn-icon {
+        background: #fee2e2;
+        color: #ef4444;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.25rem;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #fecaca;
+        }
+      }
+    }
+
+    .form-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: flex-end;
+
+      .btn {
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+
+        &.btn-primary {
+          background: #4a90e2;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #357abd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+          }
+
+          &:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+          }
+        }
+
+        &.btn-secondary {
+          background: #f1f5f9;
+          color: #475569;
+
+          &:hover {
+            background: #e2e8f0;
+          }
+        }
+
+        &.btn-lg {
+          font-size: 1.1rem;
+        }
+
+        &.btn-sm {
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

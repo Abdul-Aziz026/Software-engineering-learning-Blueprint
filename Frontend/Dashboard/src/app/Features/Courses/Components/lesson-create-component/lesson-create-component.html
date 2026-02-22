@@ -1,0 +1,114 @@
+<div class="lesson-create-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Create New Lesson</h2>
+      <p>Fill in the details below </p>
+    </div>
+
+    <form #lessonForm="ngForm" (ngSubmit)="onSubmit()" class="lesson-form">
+      <div class="form-section">
+        <h3>Subject & Chapter</h3>
+        <div class="form-group">
+          <label for="subjectId">Select Subject</label>
+          <select id="subjectId" name="subjectId" [(ngModel)]="formData.subjectId" (change)="onSubjectChange()"
+            class="form-control" required #subjectId="ngModel">
+            <option value="" disabled selected>-- Choose Subject --</option>
+            @for (subject of subjects; track subject.id) {
+            <option [value]="subject.id">{{ subject.name }}</option>
+            }
+          </select>
+          @if (subjectId.touched && subjectId.invalid) {
+          <div class="error">
+            Subject is required.
+          </div>
+          }
+        </div>
+
+        @if (formData.subjectId) {
+        <div class="form-group">
+          <label for="chapterId">Select Chapter</label>
+          <select id="chapterId" name="chapterId" [(ngModel)]="formData.chapterId" (change)="onChapterChange()"
+            class="form-control" required #chapterId="ngModel">
+            <option value="" disabled selected>-- Choose Chapter --</option>
+            @for (chapter of chapters; track chapter.id) {
+            <option [value]="chapter.id">{{ chapter.chapterName }}</option>
+            }
+            <option value="new">+ Create New Chapter</option>
+          </select>
+        </div>
+        }
+
+        @if (isNewChapter) {
+        <div class="form-group animate-fade-in">
+          <label for="newChapterName">New Chapter Name</label>
+          <input type="text" id="newChapterName" name="newChapterName" [(ngModel)]="formData.newChapterName"
+            class="form-control" placeholder="Enter chapter name" required #newChapterName="ngModel">
+          @if (newChapterName.touched && newChapterName.invalid) {
+          <div class="error">
+            Chapter name is required.
+          </div>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="form-section">
+        <h3>Lesson Identity</h3>
+        <div class="row">
+          <div class="form-group col">
+            <label for="lessonId">Lesson ID</label>
+            <input type="text" id="lessonId" name="lessonId" [(ngModel)]="formData.lessonId" class="form-control"
+              placeholder="e.g. intro-1" required #lessonId="ngModel">
+            @if (lessonId.touched && lessonId.invalid) {
+            <div class="error">
+              Lesson ID is required.
+            </div>
+            }
+          </div>
+          <div class="form-group col">
+            <label for="lessonName">Lesson Name</label>
+            <input type="text" id="lessonName" name="lessonName" [(ngModel)]="formData.lessonName" class="form-control"
+              placeholder="e.g. Introduction to Variables" required #lessonName="ngModel">
+            @if (lessonName.touched && lessonName.invalid) {
+            <div class="error">
+              Lesson name is required.
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Lesson Content</h3>
+        <div class="form-group">
+          <label for="title">Details Title</label>
+          <input type="text" id="title" name="title" [(ngModel)]="formData.title" class="form-control"
+            placeholder="Detailed Title" required #title="ngModel">
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" [(ngModel)]="formData.description" class="form-control" rows="5"
+            placeholder="Markdown or plain text description" required #description="ngModel"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Reference URLs</h3>
+        @for (url of formData.referenceUrls; track $index) {
+        <div class="form-group url-row">
+          <input [name]="'url' + $index" [(ngModel)]="formData.referenceUrls[$index]" class="form-control"
+            placeholder="https://...">
+          @if (formData.referenceUrls.length > 1) {
+          <button type="button" class="btn-icon remove-btn" (click)="removeReferenceUrl($index)">×</button>
+          }
+        </div>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" (click)='addReferenceUrl()'>+ Add More URL</button>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg" [disabled]="lessonForm.invalid">Create Lesson</button>
+      </div>
+    </form>
+  </div>
+</div>
