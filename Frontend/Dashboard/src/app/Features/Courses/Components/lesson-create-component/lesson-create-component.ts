@@ -22,7 +22,6 @@ export class LessonCreateComponent implements OnInit {
         subjectId: '',
         chapterId: '',
         newChapterName: '',
-        lessonId: '',
         lessonName: '',
         title: '',
         description: '',
@@ -41,15 +40,16 @@ export class LessonCreateComponent implements OnInit {
         private route: ActivatedRoute
     ) { }
 
+    private generateGuid(): string {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     ngOnInit(): void {
         this.loadSubjects();
-
-        this.route.queryParams.subscribe(params => {
-            if (params['subjectId']) {
-                this.formData.subjectId = params['subjectId'];
-                this.onSubjectChange();
-            }
-        });
     }
 
     loadSubjects() {
@@ -89,36 +89,39 @@ export class LessonCreateComponent implements OnInit {
     }
 
     onSubmit() {
+        const lessonId = this.generateGuid();
+        const lessonDetailsId = this.generateGuid();
+
         if (this.isNewChapter) {
             const newChapter: Chapter = {
                 id: '',
                 subjectId: this.formData.subjectId,
                 chapterName: this.formData.newChapterName,
-                lessons: [{ id: this.formData.lessonId, lessonName: this.formData.lessonName }]
+                lessons: [{ id: lessonId, lessonName: this.formData.lessonName }]
             };
 
             this.chapterService.createChapter(newChapter).subscribe({
-                next: () => this.createLessonDetails(),
+                next: () => this.createLessonDetails(lessonId, lessonDetailsId),
                 error: (err) => console.error('Error creating chapter', err)
             });
         } else {
             const selectedChapter = this.chapters.find(c => c.id === this.formData.chapterId);
             if (selectedChapter) {
                 const updatedChapter = { ...selectedChapter };
-                updatedChapter.lessons = [...(updatedChapter.lessons || []), { id: this.formData.lessonId, lessonName: this.formData.lessonName }];
+                updatedChapter.lessons = [...(updatedChapter.lessons || []), { id: lessonId, lessonName: this.formData.lessonName }];
 
                 this.chapterService.updateChapter(updatedChapter.id, updatedChapter).subscribe({
-                    next: () => this.createLessonDetails(),
+                    next: () => this.createLessonDetails(lessonId, lessonDetailsId),
                     error: (err) => console.error('Error updating chapter', err)
                 });
             }
         }
     }
 
-    createLessonDetails() {
+    createLessonDetails(lessonId: string, lessonDetailsId: string) {
         const lessonDetails: LessonDetails = {
-            id: '',
-            lessonId: this.formData.lessonId,
+            id: lessonDetailsId,
+            lessonId: lessonId,
             title: this.formData.title,
             description: this.formData.description,
             referenceUrls: this.formData.referenceUrls.filter(url => url.trim() !== '')
@@ -127,7 +130,7 @@ export class LessonCreateComponent implements OnInit {
         this.lessonDetailsService.createLessonDetails(lessonDetails).subscribe({
             next: () => {
                 alert('Lesson created successfully!');
-                this.router.navigate(['/course', this.formData.subjectId, 'lesson', this.formData.lessonId]);
+                this.router.navigate(['/course', this.formData.subjectId, 'lesson', lessonId]);
             },
             error: (err) => console.error('Error creating lesson details', err)
         });

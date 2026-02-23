@@ -24,7 +24,7 @@ export class LessonDetailsService {
     }
 
     createLessonDetails(lessonDetails: LessonDetails): Observable<LessonDetails> {
-        return this.http.post<LessonDetails>(this.apiUrl, lessonDetails);
+        return this.http.post<LessonDetails>(`${this.apiUrl}/LessonDetails`, lessonDetails);
     }
 
     updateLessonDetails(id: string, lessonDetails: LessonDetails): Observable<LessonDetails> {

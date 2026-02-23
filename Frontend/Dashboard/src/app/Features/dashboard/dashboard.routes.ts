@@ -9,4 +9,9 @@ export const DashboardRoutes: Routes = [
         path: 'course',
         loadComponent: () => import('../Courses/Components/subjects-component/subjects-component').then(o => o.SubjectsComponent)
     },
+    
+    {
+        path: 'course/lesson/create',
+        loadComponent: () => import('../Courses/Components/lesson-create-component/lesson-create-component').then(o => o.LessonCreateComponent)
+    },
 ];

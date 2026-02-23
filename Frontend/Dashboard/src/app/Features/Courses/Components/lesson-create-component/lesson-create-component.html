@@ -2,12 +2,13 @@
   <div class="card">
     <div class="card-header">
       <h2>Create New Lesson</h2>
-      <p>Fill in the details below </p>
+      <p>Fill in the details below to add a new lesson to your course.</p>
     </div>
 
     <form #lessonForm="ngForm" (ngSubmit)="onSubmit()" class="lesson-form">
+      <!-- Subject & Chapter Selection -->
       <div class="form-section">
-        <h3>Subject & Chapter</h3>
+        <h3>1. Placement</h3>
         <div class="form-group">
           <label for="subjectId">Select Subject</label>
           <select id="subjectId" name="subjectId" [(ngModel)]="formData.subjectId" (change)="onSubjectChange()"
@@ -18,9 +19,7 @@
             }
           </select>
           @if (subjectId.touched && subjectId.invalid) {
-          <div class="error">
-            Subject is required.
-          </div>
+          <div class="error">Subject is required.</div>
           }
         </div>
 
@@ -44,56 +43,43 @@
           <input type="text" id="newChapterName" name="newChapterName" [(ngModel)]="formData.newChapterName"
             class="form-control" placeholder="Enter chapter name" required #newChapterName="ngModel">
           @if (newChapterName.touched && newChapterName.invalid) {
-          <div class="error">
-            Chapter name is required.
-          </div>
+          <div class="error">Chapter name is required.</div>
           }
         </div>
         }
       </div>
 
+      <!-- Lesson Basics -->
       <div class="form-section">
-        <h3>Lesson Identity</h3>
-        <div class="row">
-          <div class="form-group col">
-            <label for="lessonId">Lesson ID</label>
-            <input type="text" id="lessonId" name="lessonId" [(ngModel)]="formData.lessonId" class="form-control"
-              placeholder="e.g. intro-1" required #lessonId="ngModel">
-            @if (lessonId.touched && lessonId.invalid) {
-            <div class="error">
-              Lesson ID is required.
-            </div>
-            }
-          </div>
-          <div class="form-group col">
-            <label for="lessonName">Lesson Name</label>
-            <input type="text" id="lessonName" name="lessonName" [(ngModel)]="formData.lessonName" class="form-control"
-              placeholder="e.g. Introduction to Variables" required #lessonName="ngModel">
-            @if (lessonName.touched && lessonName.invalid) {
-            <div class="error">
-              Lesson name is required.
-            </div>
-            }
-          </div>
+        <h3>2. Lesson Basics</h3>
+        <div class="form-group">
+          <label for="lessonName">Lesson Name</label>
+          <input type="text" id="lessonName" name="lessonName" [(ngModel)]="formData.lessonName" class="form-control"
+            placeholder="e.g. Introduction to Variables" required #lessonName="ngModel">
+          @if (lessonName.touched && lessonName.invalid) {
+          <div class="error">Lesson name is required.</div>
+          }
         </div>
       </div>
 
+      <!-- Lesson Content -->
       <div class="form-section">
-        <h3>Lesson Content</h3>
+        <h3>3. Content & Details</h3>
         <div class="form-group">
-          <label for="title">Details Title</label>
+          <label for="title">Display Title</label>
           <input type="text" id="title" name="title" [(ngModel)]="formData.title" class="form-control"
-            placeholder="Detailed Title" required #title="ngModel">
+            placeholder="Detailed title for the lesson" required #title="ngModel">
         </div>
         <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" name="description" [(ngModel)]="formData.description" class="form-control" rows="5"
-            placeholder="Markdown or plain text description" required #description="ngModel"></textarea>
+          <label for="description">Content (Markdown)</label>
+          <textarea id="description" name="description" [(ngModel)]="formData.description" class="form-control" rows="6"
+            placeholder="Describe the lesson content here..." required #description="ngModel"></textarea>
         </div>
       </div>
 
+      <!-- Reference URLs -->
       <div class="form-section">
-        <h3>Reference URLs</h3>
+        <h3>4. Resources</h3>
         @for (url of formData.referenceUrls; track $index) {
         <div class="form-group url-row">
           <input [name]="'url' + $index" [(ngModel)]="formData.referenceUrls[$index]" class="form-control"
@@ -103,10 +89,10 @@
           }
         </div>
         }
-        <button type="button" class="btn btn-secondary btn-sm" (click)='addReferenceUrl()'>+ Add More URL</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)='addReferenceUrl()'>+ Add Resource Link</button>
       </div>
 
-      <div class="form-actions">
+      <div class="form-actions border-top">
         <button type="submit" class="btn btn-primary btn-lg" [disabled]="lessonForm.invalid">Create Lesson</button>
       </div>
     </form>

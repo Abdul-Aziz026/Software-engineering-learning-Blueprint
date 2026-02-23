@@ -56,7 +56,10 @@ public class LessonDetailsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        lessonDetails.Id = Guid.NewGuid().ToString();
+        if (string.IsNullOrEmpty(lessonDetails.Id))
+        {
+            lessonDetails.Id = Guid.NewGuid().ToString();
+        }
 
         return CreatedAtAction(nameof(GetLessonDetailsById), new { id = lessonDetails.Id }, lessonDetails);
     }
