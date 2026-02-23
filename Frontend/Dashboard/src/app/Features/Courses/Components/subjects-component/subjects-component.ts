@@ -27,9 +27,6 @@ export class SubjectsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private router: Router) { }
 
-  navigateToAddLesson(subjectId: string) {
-    this.router.navigate(['/course/lesson/create'], { queryParams: { subjectId: subjectId } });
-  }
 
   ngOnInit(): void {
     this.loadSubjects();

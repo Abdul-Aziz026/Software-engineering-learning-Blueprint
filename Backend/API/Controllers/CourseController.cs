@@ -1,4 +1,7 @@
-﻿using Application.Features.Courses.DTOs;
+﻿using Application.Common.Interfaces.Publisher;
+using Application.Features.Courses.Commands.CreateCourse;
+using Application.Features.Courses.DTOs;
+using Application.Features.Courses.Query.GetAllCourses;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,52 +9,53 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class CourseController : ControllerBase
 {
-    List<SubjectResponseDto> subjects = new()
+    private readonly IMessageBus _messageBus;
+    List<CourseResponseDto> subjects = new()
     {
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "csharp",
             Name = "C#",
             Description = "C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of " +
             "beginneer to intermediate C# Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "asp_net_core",
             Name = "Asp.net Core",
             Description = "Asp.net Core Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "docker",
             Name = "Docker File",
             Description = "Docker File Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "angular",
             Name = "Angular",
             Description = "Angular Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "1234567",
             Name = "Networking",
             Description = "Networking Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "12345678",
             Name = "SQL",
             Description = "SQL Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "123456789",
             Name = "MongoDB",
             Description = "MongoDB Fundametals of beginneer to intermediate"
         },
-        new SubjectResponseDto
+        new CourseResponseDto
         {
             Id = "1234567890",
             Name = "Git",
@@ -59,8 +63,9 @@ public class CourseController : ControllerBase
         }
     };
 
-    public CourseController()
+    public CourseController(IMessageBus messageBus)
     {
+        _messageBus = messageBus;
     }
 
     // GET: api/Subjects
@@ -69,8 +74,10 @@ public class CourseController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<SubjectResponseDto>>> GetSubjects()
+    public async Task<ActionResult<IEnumerable<CourseResponseDto>>> GetSubjects()
     {
+        var query = new GetAllCoursesQuery();
+        var subjects = await _messageBus.SendAsync<GetAllCoursesQuery, List<CourseResponseDto>>(query);
         return Ok(subjects);
     }
 
@@ -80,7 +87,7 @@ public class CourseController : ControllerBase
     /// </summary>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<SubjectResponseDto>> GetSubject(string id)
+    public async Task<ActionResult<CourseResponseDto>> GetSubject(string id)
     {
         var subject = subjects.Where(s => s.Id == id).FirstOrDefault();
         return Ok(subject);
@@ -92,15 +99,14 @@ public class CourseController : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<ActionResult> CreateSubject(CreateSubjectDto createDto)
+    public async Task<ActionResult> CreateSubject(CreateCourseRequestDto createDto)
     {
-        
-        subjects.Add(new SubjectResponseDto
+        var command = createDto.ToCreateCourseCommand();
+        var subjectId = await _messageBus.SendAsync<CreateCourseCommand, string>(command);
+        if (string.IsNullOrEmpty(subjectId))
         {
-            Id = createDto.Id,
-            Name = createDto.Name,
-            Description = createDto.Description
-        });
+            return BadRequest("Failed to create subject");
+        }
         return Created();
     }
 
@@ -118,8 +124,8 @@ public class CourseController : ControllerBase
         }
 
         var subject = subjects.Where(s => s.Id == id).FirstOrDefault();
-        subject.Name = updateDto.Name;
-        subject.Description = updateDto.Description;
+        subject?.Name = updateDto.Name;
+        subject?.Description = updateDto.Description;
 
         return Ok(new
         {

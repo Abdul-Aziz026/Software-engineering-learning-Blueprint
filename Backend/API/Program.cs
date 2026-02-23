@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddConfigurationSettings(builder.Configuration);
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
+builder.Services.AddMediatRAndMasstransit();
 
 builder.Services.AddCors(options =>
 {
