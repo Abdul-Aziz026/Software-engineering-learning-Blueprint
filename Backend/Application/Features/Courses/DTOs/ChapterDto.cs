@@ -8,19 +8,19 @@ namespace Application.Features.Courses.DTOs;
 
 public class ChapterDto
 {
+    public string Id { get; set; } = string.Empty;
     public string SubjectId { get; set; } = string.Empty;
-    public string ChapterId { get; set; } = string.Empty;
     public string ChapterName { get; set; } = string.Empty;
-    public LessonDto Lesson { get; set; } = new();
+    public List<LessonDto> Lessons { get; set; } = new();
 
     public CreateChapterCommand ToCreateChapterCommand()
     {
         return new CreateChapterCommand
         {
+            ChapterId = this.Id,
             SubjectId = this.SubjectId,
-            ChapterId = this.ChapterId,
             ChapterName = this.ChapterName,
-            Lesson = this.Lesson
+            Lesson = this.Lessons[0] ?? new LessonDto()
         };
     }
 }

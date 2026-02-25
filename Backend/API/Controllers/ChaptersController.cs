@@ -67,7 +67,7 @@ public class ChaptersController : ControllerBase
         return Ok(chapters);
     }
 
-    [HttpGet("subject/{subjectId}")]
+    [HttpGet("{subjectId}")]
     public async Task<ActionResult<IEnumerable<ChapterResponseDto>>> GetChaptersBySubject(string subjectId)
     {
         var query = new GetChaptersBySubjectIdQuery

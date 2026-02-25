@@ -20,7 +20,7 @@ export class ChapterService {
     }
 
     getChaptersBySubject(subjectId: string): Observable<Chapter[]> {
-        return this.http.get<Chapter[]>(`${this.apiUrl}/subject/${subjectId}`);
+        return this.http.get<Chapter[]>(`${this.apiUrl}/${subjectId}`);
     }
 
     getChapterById(id: string): Observable<Chapter> {
