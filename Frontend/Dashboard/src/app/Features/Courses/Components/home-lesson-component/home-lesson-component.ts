@@ -1,5 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, switchMap, tap } from 'rxjs';
 import { CourseService } from '../../Services/course.service';
 import { Subject } from '../../Models/subject.model';
 import { ChapterService } from '../../Services/chapter.service';
@@ -7,38 +9,26 @@ import { ChapterService } from '../../Services/chapter.service';
 @Component({
   selector: 'app-lesson-component',
   standalone: true,
-  imports: [],
+  imports: [AsyncPipe],
   templateUrl: './home-lesson-component.html',
   styleUrl: './home-lesson-component.scss',
 })
 export class HomeLessonComponent implements OnInit {
-  subject?: Subject;
+  subject$!: Observable<Subject>;
   courseId: string = '';
 
-  constructor(private route: ActivatedRoute,
+  constructor(
+    private route: ActivatedRoute,
     private courseService: CourseService,
     private chapterService: ChapterService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router: Router
   ) { }
 
-  ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.courseId = params['id'];
-      this.loadSubjectData(this.courseId);
-    });
-  }
-
-  loadSubjectData(courseId: string) {
-    this.courseService.getCourseById(courseId).subscribe({
-      next: (res) => {
-        this.subject = res;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('error ', err);
-      }
-    });
+  ngOnInit(): void {
+    this.subject$ = this.route.params.pipe(
+      tap(params => this.courseId = params['id']),
+      switchMap(params => this.courseService.getCourseById(params['id']))
+    );
   }
 
   startLearning(): void {

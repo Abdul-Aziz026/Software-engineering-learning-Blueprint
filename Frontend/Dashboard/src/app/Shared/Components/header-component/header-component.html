@@ -11,23 +11,13 @@
 
   <!-- Tech Nav Icons -->
   <nav class="tech-nav">
+    @if (subjects$ | async; as subjects) {
     @for (subject of subjects; track subject.id) {
-      <a class="tech-link" [routerLink]="['/course', subject.id]">
-        {{ subject.name }}
-      </a>
+    <a class="tech-link" [routerLink]="['/course', subject.id]">
+      {{ subject.name }}
+    </a>
     }
-    <!-- <a class="tech-link" routerLink="/course/csharp">
-      <span>C#</span>
-    </a>
-    <a class="tech-link" routerLink="/course/asp_net_core">
-      <span>ASP.NET Core</span>
-    </a>
-    <a class="tech-link" routerLink="/course/angular">
-      <span>Angular</span>
-    </a>
-    <a class="tech-link" routerLink="/course/docker">
-      <span>Docker</span>
-    </a> -->
+    }
     <a class="tech-link" routerLink="/course/lesson/create">
       <span>Share Knowledge</span>
     </a>

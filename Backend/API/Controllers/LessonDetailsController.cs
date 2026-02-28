@@ -1,5 +1,7 @@
 ﻿using Application.Common.Interfaces.Publisher;
 using Application.Features.Chapters.Commands.CreateLessonDetails;
+using Application.Features.Chapters.Commands.DeleteLessonDetails;
+using Application.Features.Chapters.Commands.UpdateLessonDetails;
 using Application.Features.Chapters.DTOs;
 using Application.Features.Lessons.Query.GetLessonDetailsByLessonId;
 using Domain.Entities;
@@ -63,20 +65,24 @@ public class LessonDetailsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<LessonDetails>> UpdateLessonDetails(string id, [FromBody] LessonDetails lessonDetails)
+    public async Task<ActionResult> UpdateLessonDetails(string id, [FromBody] UpdateLessonDetailsCommand command)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        if (id != lessonDetails.Id)
+        if (id != command.Id)
             return BadRequest("ID mismatch");
 
-        return Ok(lessonDetails);
+        await _messageBus.SendAsync(command);
+
+        return Ok();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteLessonDetails(string id)
     {
+        var command = new DeleteLessonDetailsCommand { Id = id };
+        await _messageBus.SendAsync(command);
         return NoContent();
     }
 }

@@ -1,15 +1,16 @@
 <div class="home-lesson-container">
+  @if (subject$ | async; as subject) {
   <div class="subject-intro">
     <!-- Subject Header -->
     <div class="subject-header">
       <div class="subject-icon">📚</div>
-      <h1>{{ subject?.name }}</h1>
+      <h1>{{ subject.name }}</h1>
     </div>
 
     <!-- Subject Description -->
     <div class="subject-body">
       <h2>About This Subject</h2>
-      <p>{{ subject?.description }}</p>
+      <p>{{ subject.description }}</p>
     </div>
 
     <!-- Call to Action -->
@@ -19,4 +20,5 @@
       </button>
     </div>
   </div>
+  }
 </div>

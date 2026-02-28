@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces.Publisher;
 using Application.Features.Courses.Commands.CreateCourse;
 using Application.Features.Courses.Commands.DeleteCourse;
+using Application.Features.Courses.Commands.UpdateCourse;
 using Application.Features.Courses.DTOs;
 using Application.Features.Courses.Query.GetAllCourses;
 using Application.Features.Courses.Query.GetCourseById;
@@ -129,9 +130,15 @@ public class CourseController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var subject = subjects.Where(s => s.Id == id).FirstOrDefault();
-        subject?.Name = updateDto.Name;
-        subject?.Description = updateDto.Description;
+        var command = new UpdateCourseCommand
+        {
+            Id = id,
+            Name = updateDto.Name,
+            Description = updateDto.Description
+        };
+
+        var result = await _messageBus.SendAsync<UpdateCourseCommand, bool>(command);
+        if (!result) return BadRequest("Failed to update subject");
 
         return Ok(new
         {

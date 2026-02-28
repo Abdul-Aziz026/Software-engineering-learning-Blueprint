@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './Shared/Components/main-layout-component/main-layout-component';
-import { CourseLayoutComponent } from './Shared/Components/course-layout-component/course-layout-component';
+import { MainLayoutComponent } from './Layouts/main-layout-component/main-layout-component';
+import { CourseLayoutComponent } from './Layouts/course-layout-component/course-layout-component'; 
 
 export const routes: Routes = [
   {

@@ -1,8 +1,11 @@
 ﻿using Application.Common.Interfaces.Publisher;
 using Application.Features.Chapters.Commands.CreateChapter;
+using Application.Features.Chapters.Commands.DeleteChapter;
+using Application.Features.Chapters.Commands.UpdateChapter;
 using Application.Features.Chapters.Query.GetChaptersBySubjectId;
 using Application.Features.Courses.DTOs;
 using Application.Features.Courses.Query.GetCourseById;
+using Application.Features.Lessons.Command.CreateLesson;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,11 +64,6 @@ public class ChaptersController : ControllerBase
         }
     };
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Chapter>>> GetAllChapters()
-    {
-        return Ok(chapters);
-    }
 
     [HttpGet("{subjectId}")]
     public async Task<ActionResult<IEnumerable<ChapterResponseDto>>> GetChaptersBySubject(string subjectId)
@@ -89,21 +87,22 @@ public class ChaptersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Chapter>> UpdateChapter(string id, [FromBody] ChapterDto chapter)
+    public async Task<ActionResult> UpdateChapter(string id, [FromBody] ChapterDto chapter)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        //if (id != chapter.Id)
-        //    return BadRequest("ID mismatch");
+        var command = new UpdateChapterCommand { Id = id, ChapterName = chapter.ChapterName };
+        await _messageBus.SendAsync<UpdateChapterCommand>(command);
 
-        return Ok(chapter);
+        return Ok();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteChapter(string id)
     {
-        chapters.RemoveAll(c => c.Id == id);
+        var command = new DeleteChapterCommand { Id = id };
+        await _messageBus.SendAsync(command);
         return NoContent();
     }
 }

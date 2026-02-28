@@ -16,6 +16,7 @@ export class SubjectsComponent implements OnInit {
   selectedSubject: Subject | null = null;
   isEditing = false;
   isCreating = false;
+  editingSubjectId: string | null = null;
 
   newSubject: Subject = {
     id: '',
@@ -46,9 +47,10 @@ export class SubjectsComponent implements OnInit {
 
   startCreate(): void {
     this.isCreating = true;
+    this.isEditing = false;
+    this.editingSubjectId = null;
     this.newSubject = { id: '', name: '', description: '' };
     this.selectedSubject = null;
-    this.isEditing = false;
   }
 
   cancelCreate() {
@@ -66,7 +68,35 @@ export class SubjectsComponent implements OnInit {
       error: (err) => {
         console.error('Error creating subject:', err);
       }
-    })
+    });
+  }
+
+  cancelEdit(): void {
+    this.isEditing = false;
+    this.editingSubjectId = null;
+    this.newSubject = { id: '', name: '', description: '' };
+  }
+
+  editSubject(subject: Subject): void {
+    this.isEditing = true;
+    this.isCreating = false;
+    this.editingSubjectId = subject.id;
+    this.newSubject = { ...subject };
+  }
+
+  updateSubject(): void {
+    if (!this.editingSubjectId) return;
+    this.subjectService.updateSubject(this.editingSubjectId, this.newSubject).subscribe({
+      next: () => {
+        this.loadSubjects();
+        this.isEditing = false;
+        this.editingSubjectId = null;
+        this.newSubject = { id: '', name: '', description: '' };
+      },
+      error: (err) => {
+        console.error('Error updating subject:', err);
+      }
+    });
   }
 
   deleteSubject(subjectId: string): void {

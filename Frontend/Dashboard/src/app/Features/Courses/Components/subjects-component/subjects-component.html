@@ -4,10 +4,10 @@
         <button class="btn btn-primary" (click)="startCreate()">Add New Subject</button>
     </div>
 
-    @if (isCreating) {
+    @if (isCreating || isEditing) {
     <div class="create-form">
-        <h3>Create New Subject</h3>
-        <form (ngSubmit)="createSubject()">
+        <h3>{{ isEditing ? 'Edit Subject' : 'Create New Subject' }}</h3>
+        <form (ngSubmit)="isEditing ? updateSubject() : createSubject()">
             <div class="form-group">
                 <label for="newName">Name: </label>
                 <input type="text" id="newName" [(ngModel)]="newSubject.name" name="newName" required
@@ -20,8 +20,9 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-success">Create</button>
-                <button type="button" class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
+                <button type="submit" class="btn btn-success">{{ isEditing ? 'Update' : 'Create' }}</button>
+                <button type="button" class="btn btn-secondary"
+                    (click)="isEditing ? cancelEdit() : cancelCreate()">Cancel</button>
             </div>
         </form>
     </div>
@@ -43,6 +44,8 @@
                     <td>{{subject.name}}</td>
                     <td>{{subject.description}}</td>
                     <td>
+                        <button class="btn btn-sm btn-primary" style="margin-right: 8px;"
+                            (click)="editSubject(subject)">Edit</button>
                         <button class="btn btn-sm btn-danger" (click)="deleteSubject(subject.id)">Delete</button>
                     </td>
                 </tr>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SubjectService } from '../../Services/subject.service';
@@ -8,11 +8,16 @@ import { LessonDetailsService } from '../../Services/lesson-details.service';
 import { Subject } from '../../Models/subject.model';
 import { Chapter } from '../../Models/chapter.model';
 import { LessonDetails } from '../../Models/lesson-details.model';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-lesson-create-component',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [
+        CommonModule, 
+        FormsModule, 
+        AsyncPipe
+    ],
     templateUrl: './lesson-create-component.html',
     styleUrl: './lesson-create-component.scss'
 })
@@ -28,7 +33,7 @@ export class LessonCreateComponent implements OnInit {
         referenceUrls: ['']
     };
 
-    subjects: Subject[] = [];
+    subjects$!: Observable<Subject[]>;
     chapters: Chapter[] = [];
     isNewChapter: boolean = false;
 
@@ -53,9 +58,7 @@ export class LessonCreateComponent implements OnInit {
     }
 
     loadSubjects() {
-        this.subjectService.getAllSubjects().subscribe(subjects => {
-            this.subjects = subjects;
-        });
+        this.subjects$ = this.subjectService.getAllSubjects();
     }
 
     onSubjectChange() {

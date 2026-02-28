@@ -21,7 +21,7 @@ public class GetChaptersBySubjectIdQueryHandler : IRequestHandler<GetChaptersByS
         var chapterDtos = chapters?.Select(o =>
             new ChapterResponseDto
             {
-                ChapterId = o.Id,
+                Id = o.Id,
                 ChapterName = o.ChapterName,
                 Lessons = o.Lessons.Select(l =>
                     new LessonResponseDto

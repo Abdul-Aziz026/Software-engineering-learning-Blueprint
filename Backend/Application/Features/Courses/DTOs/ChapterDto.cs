@@ -1,4 +1,5 @@
 ﻿using Application.Features.Chapters.Commands.CreateChapter;
+using Application.Features.Lessons.Command.CreateLesson;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,17 @@ public class ChapterDto
             SubjectId = this.SubjectId,
             ChapterName = this.ChapterName,
             Lesson = this.Lessons[0] ?? new LessonDto()
+        };
+    }
+
+    public CreateLessonCommand ToCreateLessonCommand()
+    {
+        return new CreateLessonCommand
+        {
+            ChapterId = this.Id,
+            SubjectId = this.SubjectId,
+            ChapterName = this.ChapterName,
+            Lesson = this.Lessons[this.Lessons.Count - 1] ?? new LessonDto()
         };
     }
 }

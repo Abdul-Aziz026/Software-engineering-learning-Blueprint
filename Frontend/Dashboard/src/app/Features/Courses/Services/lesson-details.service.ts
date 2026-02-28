@@ -28,10 +28,10 @@ export class LessonDetailsService {
     }
 
     updateLessonDetails(id: string, lessonDetails: LessonDetails): Observable<LessonDetails> {
-        return this.http.put<LessonDetails>(`${this.apiUrl}/${id}`, lessonDetails);
+        return this.http.put<LessonDetails>(`${this.apiUrl}/LessonDetails/${id}`, lessonDetails);
     }
 
     deleteLessonDetails(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+        return this.http.delete<void>(`${this.apiUrl}/LessonDetails/${id}`);
     }
 }

@@ -1,4 +1,4 @@
 <div class="main-content">
     <p>dashboard-home works!</p>
-    <h3>{{greetMessage}}</h3>
+    <h3>{{ (greetMessage$ | async)?.message }}</h3>
 </div>
