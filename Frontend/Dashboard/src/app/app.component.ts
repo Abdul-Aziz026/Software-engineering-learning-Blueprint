@@ -1,5 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { init } from './Core/Store/actions/counter.actions';
+import { loadSubjects } from './Core/Store/actions/subject.actions';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +13,12 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   protected readonly title = signal('Dashboard');
+
+  constructor(private store: Store){}
+  ngOnInit(): void {
+    this.store.dispatch(init());
+    this.store.dispatch(loadSubjects());
+  }
 }

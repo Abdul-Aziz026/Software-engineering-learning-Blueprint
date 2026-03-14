@@ -23,12 +23,12 @@ export class SubjectService {
         return this.http.get<Subject>(`${this.apiUrl}/${id}`);
     }
 
-    createSubject(subject: Subject): Observable<Subject> {
-        return this.http.post<Subject>(this.apiUrl, subject);
+    createSubject(subject: Subject): Observable<void> {
+        return this.http.post<void>(this.apiUrl, subject);
     }
 
-    updateSubject(id: string, subject: Subject): Observable<Subject> {
-        return this.http.put<Subject>(`${this.apiUrl}/${id}`, subject);
+    updateSubject(id: string, subject: Subject): Observable<void> {
+        return this.http.put<void>(`${this.apiUrl}/${id}`, subject);
     }
 
     deleteSubject(id: string): Observable<void> {

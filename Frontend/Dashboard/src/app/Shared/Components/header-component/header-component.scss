@@ -1,83 +1,89 @@
 .header {
-  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 1rem 2rem;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 20px;
-  background-color: #1f2937;
-  /* dark background */
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(15, 23, 42, 0.9);
+  }
 }
 
-/* Logo */
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: bold;
-  font-size: 18px;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+
+  .tech-link {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
 }
 
-.logo-icon {
-  font-size: 22px;
-}
-
-/* Tech Nav Links */
 .tech-nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 1.5rem;
   flex: 1;
-  padding: 0 10px;
+  padding: 0 2rem;
 }
 
 .tech-link {
-  color: #cbd5e1;
-  /* light gray */
+  color: var(--text-secondary);
   text-decoration: none;
-  padding: 0 5px;
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
 }
 
-.tech-link:hover {
-  background-color: #2563eb;
-  /* darker hover */
-  color: #f8fafc;
-  /* white */
-  cursor: pointer;
-}
-
-/* Auth Buttons */
 .auth-buttons {
   display: flex;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .auth-button {
-  color: #f8fafc;
-  /* blue */
-  border: 1px solid #2563eb;
-  padding: 6px 14px;
-  border-radius: 4px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  background: var(--glass-bg);
+
+  &:hover {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transform: translateY(-1px);
+  }
 }
 
-.auth-button:hover {
-  background-color: #2563eb;
-  color: white;
-  cursor: pointer;
-}
-
-
-/* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .tech-nav {
     display: none;
-    /* hide tech links on mobile */
   }
 }

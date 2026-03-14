@@ -1,26 +1,26 @@
 <div class="subjects-container">
-    <div class="header">
+    <header class="header">
         <h2>Subjects</h2>
         <button class="btn btn-primary" (click)="startCreate()">Add New Subject</button>
-    </div>
+    </header>
 
     @if (isCreating || isEditing) {
-    <div class="create-form">
+    <div class="form-container">
         <h3>{{ isEditing ? 'Edit Subject' : 'Create New Subject' }}</h3>
         <form (ngSubmit)="isEditing ? updateSubject() : createSubject()">
             <div class="form-group">
-                <label for="newName">Name: </label>
+                <label for="newName">Name</label>
                 <input type="text" id="newName" [(ngModel)]="newSubject.name" name="newName" required
-                    class="form-control">
+                    class="form-control" placeholder="e.g. Master Engineering">
             </div>
             <div class="form-group">
-                <label for="newDescription">Description:</label>
+                <label for="newDescription">Description</label>
                 <textarea id="newDescription" [(ngModel)]="newSubject.description" name="newDescription" rows="3"
-                    class="form-control"></textarea>
+                    class="form-control" placeholder="Describe the subject goals..."></textarea>
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-success">{{ isEditing ? 'Update' : 'Create' }}</button>
+                <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update Subject' : 'Create Subject' }}</button>
                 <button type="button" class="btn btn-secondary"
                     (click)="isEditing ? cancelEdit() : cancelCreate()">Cancel</button>
             </div>
@@ -28,29 +28,26 @@
     </div>
     }
 
-
-    <div class="subjects-list">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (subject of subjects; track $index) {
-                <tr>
-                    <td>{{subject.name}}</td>
-                    <td>{{subject.description}}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" style="margin-right: 8px;"
-                            (click)="editSubject(subject)">Edit</button>
-                        <button class="btn btn-sm btn-danger" (click)="deleteSubject(subject.id)">Delete</button>
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
+    <div class="subjects-grid">
+        @for (subject of (subjects$ | async); track subject.id) {
+        <div class="subject-card">
+            <div class="card-header">
+                <h3>{{subject.name}}</h3>
+            </div>
+            <div class="card-content">
+                <p>{{subject.description}}</p>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-sm btn-secondary" (click)="editSubject(subject)">Edit</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteSubject(subject.id)">Delete</button>
+            </div>
+        </div>
+        }
     </div>
+
+    @if (!(subjects$ | async)?.length && !isCreating) {
+    <div class="empty-state">
+        <p>No subjects available yet. Start your journey by adding one!</p>
+    </div>
+    }
 </div>

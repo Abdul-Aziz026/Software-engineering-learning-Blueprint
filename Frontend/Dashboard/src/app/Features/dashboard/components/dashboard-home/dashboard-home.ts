@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 export class DashboardHome implements OnInit {
   greetMessage$!: Observable<any>;
 
-  constructor(private dashboardservice: DashboardService) { }
+  constructor(private dashboardservice: DashboardService) {}
 
   ngOnInit(): void {
     this.greetMessage$ = this.dashboardservice.getGreetMessage();

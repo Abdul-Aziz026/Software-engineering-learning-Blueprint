@@ -101,7 +101,7 @@ public class DatabaseContext : IDatabaseContext
         {
             var collection = GetCollection<T>();
             var result = await collection.ReplaceOneAsync(o => o.Id == entity.Id, entity);
-            var success = result.IsAcknowledged && result.ModifiedCount > 0;
+            var success = result.IsAcknowledged;
             if (success)
             {
                 _logger.LogInformation($"Updated entity of type {typeof(T).FullName} with Id {entity.Id}");
