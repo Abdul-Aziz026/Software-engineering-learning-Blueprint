@@ -3,8 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from './config.service';
 
-export interface ChatResponse {
-  response: string;
+export interface ToolCallRecord {
+  Id: number;
+  ToolName: string;
+  Arguments: string;
+  Result: string;
+}
+
+export interface ChatResponseDto {
+  answer: string;
+  provider: number;
+  toolCalls: ToolCallRecord[];
 }
 
 @Injectable({
@@ -20,7 +29,7 @@ export class ChatService {
     this.chatUrl = `${this.configService.baseUrl}/chat`;
   }
 
-  sendMessage(message: string): Observable<ChatResponse> {
-    return this.http.post<ChatResponse>(this.chatUrl, { message });
+  sendMessage(message: string, provider: number = 0): Observable<ChatResponseDto> {
+    return this.http.post<ChatResponseDto>(this.chatUrl, { query: message, provider });
   }
 }

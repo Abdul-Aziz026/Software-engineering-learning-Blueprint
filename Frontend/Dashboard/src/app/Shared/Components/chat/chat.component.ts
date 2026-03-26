@@ -22,6 +22,7 @@ export class ChatComponent {
   isOpen = false;
   isLoading = false;
   newMessage = '';
+  selectedProvider: number = 0; // 0 = Gemini, 1 = Claude
   messages: Message[] = [
     { text: 'Hello! How can I help you grow in the AI world today?', sender: 'ai', time: new Date() }
   ];
@@ -48,10 +49,10 @@ export class ChatComponent {
       this.isLoading = true;
 
       // Call backend AI service
-      this.chatService.sendMessage(userText).subscribe({
-        next: (response) => {
+      this.chatService.sendMessage(userText, this.selectedProvider).subscribe({
+        next: (res) => {
           this.messages.push({
-            text: response.response,
+            text: res.answer,
             sender: 'ai',
             time: new Date()
           });

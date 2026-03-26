@@ -23,7 +23,7 @@ builder.Services.Configure<ClaudeOptions>(builder.Configuration.GetSection("Clau
 builder.Services.AddMcpServer()
     .WithHttpTransport()
     .AddAuthorizationFilters()
-    .WithToolsFromAssembly(typeof(Program).Assembly);
+    .WithToolsFromAssembly(typeof(Application.Tools.TutorialTools).Assembly);
 
 builder.Services.AddSingleton<IMcpService, McpService>();
 // After Kestrel is listening, connect in-process MCP client to MapMcp endpoint.

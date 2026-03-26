@@ -1,4 +1,4 @@
-﻿/*
+/*
 It runs the AGENTIC LOOP:
 1. Get Tools from MCP server
 2. Send Query + Tools to LLM (e.g. Gemini/Claude)
@@ -13,6 +13,7 @@ using MediatR;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Text.Json;
 
 namespace Application.Features.Chat.Commands;
 
@@ -58,8 +59,22 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
         // This is the AGENTIC LOOP
         while (true)
         {
-            var response = await llm.GetResponseAsync(messages, chatOptions, ct);
+            ChatResponse response;
 
+            try
+            {
+                response = await llm.GetResponseAsync(messages, chatOptions, ct);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error getting response from LLM");
+                return new ChatResponseDto
+                {
+                    Answer = $"Error getting response from LLM: {ex.Message}",
+                    Provider = request.Provider,
+                    ToolCalls = toolCallLog
+                };
+            }
             // add llm response to conversation history
             foreach (var message in response.Messages)
             {
@@ -77,9 +92,8 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
             {
                 var answer = string.Join("\n", 
                                 response.Messages
-                                .SelectMany(m => m.Contents)
-                                .OfType<TextContent>()
-                                .SelectMany(txt => txt.Text)
+                                .Select(m => m.Contents)
+                                .SelectMany(txt => txt)
                                 .ToList());
                 _logger.LogInformation($"Chat complete. ToolsUsed={toolCallLog.Count}");
                 return new ChatResponseDto
@@ -94,9 +108,7 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
             foreach (var toolCall in toolCalls)
             {
                 _logger.LogInformation($"LLM called tool: {toolCall.Name} with args: {toolCall.Arguments}");
-                var args = toolCall.Arguments is not null
-                    ? new Dictionary<string, object?>(toolCall.Arguments)
-                    : new Dictionary<string, object?>();
+                var args = ParseArguments(toolCall.Arguments);
 
                 string result;
                 try
@@ -110,13 +122,29 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
                 }
                 toolCallLog.Add(ToolCallRecord.Create(toolCall.Name, result));
 
-                // Wrap result in the format the LLM expects for the next turn
+                // Wrap result in a Dictionary as Gemini SDK requires the result to be a JSON object
+                var toolResultObj = new Dictionary<string, object> { { "result", result } };
+
                 toolResultMessages.Add(new ChatMessage(
                     ChatRole.Tool,
-                    contents: [new FunctionResultContent(toolCall.CallId ?? toolCall.Name, result)]
+                    contents: [new FunctionResultContent(toolCall.CallId ?? toolCall.Name, toolResultObj)]
                 ));
             }
             messages.AddRange(toolResultMessages);
         }
+    }
+
+    private static Dictionary<string, object?> ParseArguments(object? arguments)
+    {
+        if (arguments is IDictionary<string, object?> dict)
+            return dict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        if (arguments is JsonElement json)
+            return JsonSerializer.Deserialize<Dictionary<string, object?>>(json.GetRawText())!;
+
+        if (arguments is string str)
+            return JsonSerializer.Deserialize<Dictionary<string, object?>>(str)!;
+
+        return new();
     }
 }

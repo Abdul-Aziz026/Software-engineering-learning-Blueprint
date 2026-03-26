@@ -1,4 +1,4 @@
-﻿
+
 using GenerativeAI.Microsoft;
 using Infrastructure.Configuration;
 using Microsoft.Extensions.AI;
@@ -11,7 +11,6 @@ public class GeminiChatClient
     {
         return new GenerativeAIChatClient(geminiOptions.ApiKey, geminiOptions.Model)
             .AsBuilder()
-            .UseFunctionInvocation()
             .Build();
     }
 }
