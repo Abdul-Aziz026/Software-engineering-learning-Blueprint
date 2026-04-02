@@ -1,5 +1,6 @@
 using API.Extensions;
 using Application.Common.Interfaces.Services;
+using Infrastructure.Chat;
 using Infrastructure.Configuration;
 using Infrastructure.Llm;
 using Infrastructure.MCP;
@@ -21,7 +22,7 @@ builder.Services.Configure<McpServerOptions>(builder.Configuration.GetSection("M
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection("GeminiOptions"));
 builder.Services.Configure<ClaudeOptions>(builder.Configuration.GetSection("ClaudeOptions"));
 
-
+builder.Services.AddSingleton<IChatHistoryStore, InMemoryChatHistoryStore>();
 builder.Services.AddMcpServer()
     .WithHttpTransport()
     .AddAuthorizationFilters()

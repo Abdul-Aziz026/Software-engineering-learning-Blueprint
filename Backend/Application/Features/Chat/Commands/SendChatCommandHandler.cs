@@ -20,20 +20,32 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
 {
     private readonly IMcpService _mcpService;
     private readonly ILlmFactory _llmFactory;
+    private readonly IChatHistoryStore _historyStore;
     private readonly ILogger<SendChatCommandHandler> _logger;
     public SendChatCommandHandler(
                 IMcpService mcpService,
                 ILlmFactory llmFactory,
+                IChatHistoryStore chatHistoryStore,
                 ILogger<SendChatCommandHandler> logger)
     {
         _mcpService = mcpService;
         _llmFactory = llmFactory;
+        _historyStore = chatHistoryStore;
         _logger = logger;
     }
 
     public async Task<ChatResponseDto> Handle(SendChatCommand request, CancellationToken ct)
     {
         _logger.LogInformation($"Handling SendChatCommand. Provider={request.Provider} Query={request.Query}");
+
+        var threadId = request.ThreadId;
+        if (string.IsNullOrWhiteSpace(threadId))
+        {
+            threadId = await _historyStore.CreateThreadAsync();
+            _logger.LogInformation($"Created new thread {threadId}");
+        }
+
+        var threadMessages = await _historyStore.GetHistoryAsync(threadId);
 
         // Step 1: Ask MCP server what tools it has
         var tools = await _mcpService.GetToolsAsync(ct);
@@ -48,11 +60,8 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
             ToolMode = ChatToolMode.Auto
         };
 
-        // Step 4: Start conversation with llm
-        var messages = new List<ChatMessage>
-        {
-            new ChatMessage(ChatRole.User, request.Query)
-        };
+        // Step 4: Start conversation with llm by add user latest query
+        threadMessages.Add(new ChatMessage(ChatRole.User, request.Query));
         var toolCallLog = new List<ToolCallRecord>();
 
         // This is the AGENTIC LOOP
@@ -62,7 +71,7 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
 
             try
             {
-                response = await llm.GetResponseAsync(messages, chatOptions, ct);
+                response = await llm.GetResponseAsync(threadMessages, chatOptions, ct);
             }
             catch (Exception ex)
             {
@@ -77,7 +86,7 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
             // add llm response to conversation history (Gemini MEAI mapper can mis-cast mixed TextContent + tool calls)
             foreach (var message in response.Messages)
             {
-                messages.Add(NormalizeAssistantMessageForHistory(message));
+                threadMessages.Add(NormalizeAssistantMessageForHistory(message));
             }
 
             // did LLM call a tool?
@@ -95,8 +104,11 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
                         .OfType<TextContent>()
                         .Select(c => c.Text));
                 _logger.LogInformation($"Chat complete. ToolsUsed={toolCallLog.Count}");
+                await _historyStore.SaveChatMessageAsync(threadId, threadMessages);
+
                 return new ChatResponseDto
                 {
+                    ThreadId = threadId,
                     Answer = answer,
                     Provider = request.Provider,
                     ToolCalls = toolCallLog
@@ -128,7 +140,7 @@ public class SendChatCommandHandler : IRequestHandler<SendChatCommand, ChatRespo
                     contents: [new FunctionResultContent(toolCall.CallId ?? toolCall.Name, toolResultJson)]
                 ));
             }
-            messages.AddRange(toolResultMessages);
+            threadMessages.AddRange(toolResultMessages);
         }
     }
 

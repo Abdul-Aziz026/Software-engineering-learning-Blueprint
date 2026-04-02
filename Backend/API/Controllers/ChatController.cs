@@ -14,9 +14,13 @@ namespace API.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IMessageBus _messageBus;
-    public ChatController(IMessageBus messageBus)
+    private readonly IChatHistoryStore _historyStore;
+
+    public ChatController(IMessageBus messageBus
+        , IChatHistoryStore chatHistoryStore)
     {
         _messageBus = messageBus;
+        _historyStore = chatHistoryStore;
     }
 
     // ── POST /api/chat ───────────────────────────────────────────────────────
@@ -28,11 +32,28 @@ public class ChatController : ControllerBase
     {
         var command = new SendChatCommand
         {
+            ThreadId = request.ThreadId,
             Query = request.Query,
             Provider = request.Provider
         };
         var result = await _messageBus.SendAsync<SendChatCommand, ChatResponseDto>(command);
         return Ok(result);
+    }
+
+    // ── GET /api/chat/threads — list all threads ─────────────────────
+    [HttpGet("threads")]
+    public async Task<IActionResult> GetThreads()
+    {
+        var threads = await _historyStore.GetAllThreadAsync();
+        return Ok(threads);
+    }
+
+    // ── DELETE /api/chat/threads/{threadId} — delete a thread ────────
+    [HttpDelete("threads/{threadId}")]
+    public async Task<IActionResult> DeleteThread(string threadId)
+    {
+        await _historyStore.DeleteThreadAsync(threadId);
+        return NoContent();
     }
 
     // ── GET /api/chat/tools ──────────────────────────────────────────────────
