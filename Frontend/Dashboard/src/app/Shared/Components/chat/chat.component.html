@@ -1,8 +1,27 @@
-<div class="chat-wrapper" [class.open]="isOpen">
+<div class="chat-wrapper" [class.open]="isOpen" [class.resizing]="isResizing">
   <!-- Chat Window -->
-  <div class="chat-window shadow-premium">
+  <div class="chat-window shadow-premium"
+       [class.size-compact]="windowSize === 'compact'"
+       [class.size-expanded]="windowSize === 'expanded'"
+       [class.size-maximized]="windowSize === 'maximized'"
+       [class.size-custom]="windowSize === 'custom'"
+       [style.width.px]="effectiveWidth"
+       [style.height.px]="effectiveHeight">
+
+    <!-- Resize handle (top-left corner) -->
+    <div class="resize-handle"
+         (mousedown)="startResize($event)"
+         (touchstart)="startResize($event)"
+         title="Drag to resize">
+      <svg viewBox="0 0 12 12" fill="none">
+        <path d="M1 4 L4 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M1 8 L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M1 11 L11 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
     <div class="chat-header">
-      
+
       <button class="icon-btn" (click)="showThreadList = !showThreadList" [title]="showThreadList ? 'Back to Chat' : 'Chat History'">
         @if (!showThreadList) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -30,7 +49,7 @@
           </div>
         }
       </div>
-      
+
       <div class="header-actions">
         @if (showThreadList) {
           <button class="icon-btn new-chat-btn" (click)="startNewChat()" title="New Chat">
@@ -40,6 +59,34 @@
             </svg>
           </button>
         }
+
+        <button class="icon-btn size-btn"
+                (click)="cycleSize()"
+                [title]="sizeButtonTitle">
+          @if (windowSize === 'compact') {
+            <!-- Expand icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          } @else if (windowSize === 'expanded') {
+            <!-- Maximize icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            </svg>
+          } @else {
+            <!-- Minimize icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 14 10 14 10 20"></polyline>
+              <polyline points="20 10 14 10 14 4"></polyline>
+              <line x1="14" y1="10" x2="21" y2="3"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          }
+        </button>
+
         <button class="close-btn" (click)="toggleChat()">×</button>
       </div>
     </div>
@@ -71,9 +118,9 @@
             <option [ngValue]="0">Gemini</option>
             <option [ngValue]="1">Claude</option>
           </select>
-          <input 
-            type="text" 
-            [(ngModel)]="newMessage" 
+          <input
+            type="text"
+            [(ngModel)]="newMessage"
             (keyup.enter)="sendMessage()"
             [disabled]="isLoading"
             placeholder="Ask me a question..."
@@ -94,7 +141,7 @@
           </div>
         }
         @for (thread of threads; track thread.threadId) {
-          <div class="thread-item" 
+          <div class="thread-item"
                [class.active]="thread.threadId === currentThreadId"
                (click)="switchThread(thread.threadId)">
             <div class="thread-content">

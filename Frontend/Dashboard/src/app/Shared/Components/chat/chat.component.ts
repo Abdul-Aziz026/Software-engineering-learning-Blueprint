@@ -1,8 +1,13 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  HostListener,
+  OnDestroy
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../../Core/Services/chat.service';
-import {marked} from 'marked';
+import { marked } from 'marked';
 
 interface ChatThread {
   threadId: string;
@@ -16,6 +21,25 @@ interface Message {
   time: Date;
 }
 
+type WindowSize = 'compact' | 'expanded' | 'maximized' | 'custom';
+
+interface SizeState {
+  preset: WindowSize;
+  width: number | null;
+  height: number | null;
+}
+
+const SIZE_STORAGE_KEY = 'chat_window_size';
+
+const PRESETS: Record<Exclude<WindowSize, 'custom'>, { w: number; h: number }> = {
+  compact:    { w: 380,  h: 600 },
+  expanded:   { w: 560,  h: 720 },
+  maximized:  { w: 960,  h: 900 }
+};
+
+const MIN_WIDTH = 320;
+const MIN_HEIGHT = 360;
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -23,7 +47,7 @@ interface Message {
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent {
+export class ChatComponent implements OnDestroy {
   threads: ChatThread[] = [];
   currentThreadId: string | null = null;
   showThreadList: boolean = false;
@@ -34,28 +58,45 @@ export class ChatComponent {
   selectedProvider: number = 0; // 0 = Gemini, 1 = Claude
   messages: Message[] = [];
 
+  windowSize: WindowSize = 'compact';
+  customWidth: number | null = null;
+  customHeight: number | null = null;
+  isResizing = false;
+
+  private resizeStartX = 0;
+  private resizeStartY = 0;
+  private resizeStartWidth = 0;
+  private resizeStartHeight = 0;
+
   constructor(private chatService: ChatService,
               private cd: ChangeDetectorRef
   ) {
     this.loadThreadList();
+    this.loadSizeState();
   }
+
+  ngOnDestroy(): void {
+    this.endResize();
+  }
+
   loadThreadList() {
     const saved = localStorage.getItem('chat_threads');
     this.threads = saved ? JSON.parse(saved) : [];
-    
-    // loads the most recent thread or start fresh
+
     if (this.threads.length > 0) {
       this.switchThread(this.threads[0].threadId);
     }
     else {
       this.messages = [
-        { 
-          text: 'Hello! How can I help you grow in the AI world today?', 
-          sender: 'ai', 
-          time: new Date() 
-        }]
-      }
+        {
+          text: 'Hello! How can I help you grow in the AI world today?',
+          sender: 'ai',
+          time: new Date()
+        }
+      ];
+    }
   }
+
   switchThread(threadId: string): void {
     this.currentThreadId = threadId;
     this.showThreadList = false;
@@ -66,6 +107,114 @@ export class ChatComponent {
     this.isOpen = !this.isOpen;
   }
 
+  /* ===== Window sizing ===== */
+
+  cycleSize(): void {
+    const order: WindowSize[] = ['compact', 'expanded', 'maximized'];
+    const start = order.indexOf(this.windowSize);
+    const next = order[(start + 1) % order.length];
+    this.windowSize = next;
+    this.customWidth = null;
+    this.customHeight = null;
+    this.saveSizeState();
+  }
+
+  get effectiveWidth(): number {
+    if (this.windowSize === 'custom' && this.customWidth) return this.customWidth;
+    const preset = PRESETS[this.windowSize as Exclude<WindowSize, 'custom'>] ?? PRESETS.compact;
+    return Math.min(preset.w, window.innerWidth - 32);
+  }
+
+  get effectiveHeight(): number {
+    if (this.windowSize === 'custom' && this.customHeight) return this.customHeight;
+    const preset = PRESETS[this.windowSize as Exclude<WindowSize, 'custom'>] ?? PRESETS.compact;
+    return Math.min(preset.h, window.innerHeight - 100);
+  }
+
+  get sizeButtonTitle(): string {
+    switch (this.windowSize) {
+      case 'compact':   return 'Expand chat';
+      case 'expanded':  return 'Maximize chat';
+      case 'maximized': return 'Reset to compact';
+      default:          return 'Resize chat';
+    }
+  }
+
+  startResize(event: MouseEvent | TouchEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const point = this.pointFromEvent(event);
+    if (!point) return;
+
+    this.isResizing = true;
+    this.resizeStartX = point.x;
+    this.resizeStartY = point.y;
+    this.resizeStartWidth = this.effectiveWidth;
+    this.resizeStartHeight = this.effectiveHeight;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  @HostListener('document:touchmove', ['$event'])
+  onResizeMove(event: MouseEvent | TouchEvent): void {
+    if (!this.isResizing) return;
+    const point = this.pointFromEvent(event);
+    if (!point) return;
+
+    // Dragging the top-left handle: moving up/left makes window bigger.
+    const dx = this.resizeStartX - point.x;
+    const dy = this.resizeStartY - point.y;
+
+    const newWidth  = Math.max(MIN_WIDTH,  Math.min(this.resizeStartWidth  + dx, window.innerWidth - 32));
+    const newHeight = Math.max(MIN_HEIGHT, Math.min(this.resizeStartHeight + dy, window.innerHeight - 32));
+
+    this.windowSize = 'custom';
+    this.customWidth = newWidth;
+    this.customHeight = newHeight;
+  }
+
+  @HostListener('document:mouseup')
+  @HostListener('document:touchend')
+  @HostListener('document:touchcancel')
+  onResizeEnd(): void {
+    if (!this.isResizing) return;
+    this.endResize();
+    this.saveSizeState();
+  }
+
+  private endResize(): void {
+    this.isResizing = false;
+  }
+
+  private pointFromEvent(event: MouseEvent | TouchEvent): { x: number; y: number } | null {
+    if (event instanceof TouchEvent) {
+      const t = event.touches[0] ?? event.changedTouches[0];
+      return t ? { x: t.clientX, y: t.clientY } : null;
+    }
+    return { x: (event as MouseEvent).clientX, y: (event as MouseEvent).clientY };
+  }
+
+  private loadSizeState(): void {
+    try {
+      const raw = localStorage.getItem(SIZE_STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw) as SizeState;
+      this.windowSize = state.preset ?? 'compact';
+      this.customWidth = state.width ?? null;
+      this.customHeight = state.height ?? null;
+    } catch { /* ignore */ }
+  }
+
+  private saveSizeState(): void {
+    const state: SizeState = {
+      preset: this.windowSize,
+      width: this.customWidth,
+      height: this.customHeight
+    };
+    try { localStorage.setItem(SIZE_STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
+  }
+
+  /* ===== Messaging ===== */
+
   sendMessage() {
     if (!this.newMessage.trim() || this.isLoading) return;
     this.messages.push({
@@ -73,12 +222,12 @@ export class ChatComponent {
         sender: 'user',
         time: new Date()
     });
-      
+
     const userText = this.newMessage;
     this.newMessage = '';
     this.isLoading = true;
 
-    this.chatService.sendMessage(userText, 
+    this.chatService.sendMessage(userText,
       this.selectedProvider, this.currentThreadId ?? undefined).subscribe({
         next: (res) => {
           if (!this.currentThreadId) {
@@ -87,7 +236,7 @@ export class ChatComponent {
               threadId: res.threadId,
               title: userText.length > 40 ? userText.substring(0, 40) + '...' : userText,
               lastMessageAt: new Date()
-            })
+            });
           }
           else {
             const thread = this.threads.find(t => t.threadId == this.currentThreadId);
@@ -100,23 +249,23 @@ export class ChatComponent {
             sender: 'ai',
             time: new Date()
           });
-          this.saveMessages(this.currentThreadId); // ✅ save AI response
+          this.saveMessages(this.currentThreadId);
+          this.saveThreadList();
           this.isLoading = false;
           this.cd.detectChanges();
         },
-        error: (err) => {
-          this.messages.push({ 
+        error: () => {
+          this.messages.push({
             text: 'Sorry, I encountered an error.',
             sender: 'ai',
             time: new Date() });
           this.isLoading = false;
         }
       });
-    
   }
 
   startNewChat(): void {
-    this.currentThreadId = null;  // server will create the thread on first message
+    this.currentThreadId = null;
     this.messages = [
       { text: 'Hello! How can I help you today?', sender: 'ai', time: new Date() }
     ];
@@ -128,11 +277,10 @@ export class ChatComponent {
     this.threads = this.threads.filter(t => t.threadId !== threadId);
     localStorage.removeItem(`chat_thread_${threadId}`);
     this.saveThreadList();
-    // If we deleted the current thread, start fresh
     if (this.currentThreadId === threadId) {
       this.startNewChat();
     }
-    this.chatService.deleteThread(threadId).subscribe(); // fire & forget
+    this.chatService.deleteThread(threadId).subscribe();
   }
 
   private loadMessages(threadId: string): Message[] {
@@ -160,4 +308,3 @@ export class ChatComponent {
     return marked.parse(text) as string;
   }
 }
-
