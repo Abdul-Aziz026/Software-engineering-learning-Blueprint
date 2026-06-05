@@ -7,11 +7,12 @@ import { Observable } from 'rxjs';
 import { selectAllSubjects, selectSubjectsError, selectSubjectsLoading } from '../../../../Core/Store/selectors/subject.selectors';
 import { AsyncPipe } from '@angular/common';
 import { createSubject, deleteSubject, loadSubjects, updateSubject } from '../../../../Core/Store/actions/subject.actions';
+import { ConfirmDialogComponent } from '../../../../Shared/Components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-subjects-component',
   standalone: true,
-  imports: [FormsModule, AsyncPipe],
+  imports: [FormsModule, AsyncPipe, ConfirmDialogComponent],
   templateUrl: './subjects-component.html',
   styleUrl: './subjects-component.scss',
 })
@@ -30,6 +31,8 @@ export class SubjectsComponent implements OnInit {
     name: '',
     description: ''
   };
+
+  pendingDelete: Subject | null = null;
 
   constructor(private store: Store, private router: Router) {
     this.subjects$ = this.store.select(selectAllSubjects);
@@ -81,11 +84,19 @@ export class SubjectsComponent implements OnInit {
     this.newSubject = { id: '', name: '', description: '' };
   }
 
-  deleteSubject(subjectId: string): void {
-    if (confirm('Are you sure you want to delete this subject?')) {
-      this.store.dispatch(deleteSubject({ id: subjectId }));
-      this.selectedSubject = null;
-    }
+  requestDelete(subject: Subject): void {
+    this.pendingDelete = subject;
+  }
+
+  confirmDelete(): void {
+    if (!this.pendingDelete) return;
+    this.store.dispatch(deleteSubject({ id: this.pendingDelete.id }));
+    this.selectedSubject = null;
+    this.pendingDelete = null;
+  }
+
+  cancelDelete(): void {
+    this.pendingDelete = null;
   }
 
   openSubject(subjectId: string): void {

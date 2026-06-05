@@ -46,7 +46,7 @@
                 <button class="btn btn-sm btn-secondary"
                         (click)="$event.stopPropagation(); editSubject(subject)">Edit</button>
                 <button class="btn btn-sm btn-danger"
-                        (click)="$event.stopPropagation(); deleteSubject(subject.id)">Delete</button>
+                        (click)="$event.stopPropagation(); requestDelete(subject)">Delete</button>
             </div>
         </div>
         }
@@ -58,3 +58,14 @@
     </div>
     }
 </div>
+
+<app-confirm-dialog
+    [isOpen]="!!pendingDelete"
+    title="Delete subject?"
+    [message]="'Are you sure you want to delete &quot;' + (pendingDelete?.name || 'this subject') + '&quot;? This action cannot be undone.'"
+    confirmLabel="Delete"
+    cancelLabel="Cancel"
+    variant="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()">
+</app-confirm-dialog>

@@ -1,0 +1,21 @@
+@if (isOpen) {
+<div class="confirm-backdrop" (click)="onBackdropClick($event)">
+  <div class="confirm-dialog" role="alertdialog" aria-modal="true">
+    <div class="confirm-icon" [class.danger]="variant === 'danger'">
+      @if (variant === 'danger') { ! } @else { ? }
+    </div>
+
+    <h3 class="confirm-title">{{ title }}</h3>
+    <p class="confirm-message">{{ message }}</p>
+
+    <div class="confirm-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">{{ cancelLabel }}</button>
+      <button type="button"
+              class="btn"
+              [class.btn-danger]="variant === 'danger'"
+              [class.btn-primary]="variant === 'primary'"
+              (click)="onConfirm()">{{ confirmLabel }}</button>
+    </div>
+  </div>
+</div>
+}
