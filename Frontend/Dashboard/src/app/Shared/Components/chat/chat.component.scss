@@ -7,6 +7,19 @@
   flex-direction: column;
   align-items: flex-end;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  .chat-window {
+    pointer-events: none;
+  }
+
+  &.open .chat-window {
+    pointer-events: auto;
+  }
 }
 
 .shadow-premium {

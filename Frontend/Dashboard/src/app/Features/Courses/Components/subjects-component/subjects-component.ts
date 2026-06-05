@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 import { selectAllSubjects, selectSubjectsError, selectSubjectsLoading } from '../../../../Core/Store/selectors/subject.selectors';
 import { AsyncPipe } from '@angular/common';
 import { createSubject, deleteSubject, loadSubjects, updateSubject } from '../../../../Core/Store/actions/subject.actions';
-import { SignalrService } from '../../../../Core/Services/signalr.service';
 
 @Component({
   selector: 'app-subjects-component',
@@ -33,19 +32,16 @@ export class SubjectsComponent implements OnInit {
   };
 
   constructor(private store: Store, private router: Router) {
-    console.log('SubjectsComponent instantiated');
     this.subjects$ = this.store.select(selectAllSubjects);
     this.loading$ = this.store.select(selectSubjectsLoading);
     this.error$ = this.store.select(selectSubjectsError);
   }
 
   ngOnInit(): void {
-    console.log('SubjectsComponent initialized');
     this.store.dispatch(loadSubjects());
   }
 
   startCreate(): void {
-    console.log('Starting subject creation...');
     this.isCreating = true;
     this.isEditing = false;
     this.editingSubjectId = null;
@@ -90,5 +86,9 @@ export class SubjectsComponent implements OnInit {
       this.store.dispatch(deleteSubject({ id: subjectId }));
       this.selectedSubject = null;
     }
+  }
+
+  openSubject(subjectId: string): void {
+    this.router.navigate(['/course', subjectId]);
   }
 }

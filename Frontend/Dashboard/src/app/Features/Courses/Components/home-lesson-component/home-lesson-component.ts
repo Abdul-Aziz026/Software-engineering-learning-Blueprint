@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, switchMap, tap } from 'rxjs';
-import { CourseService } from '../../Services/course.service';
+import { SubjectService } from '../../Services/subject.service';
 import { Subject } from '../../Models/subject.model';
 import { ChapterService } from '../../Services/chapter.service';
 
@@ -19,7 +19,7 @@ export class HomeLessonComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private courseService: CourseService,
+    private subjectService: SubjectService,
     private chapterService: ChapterService,
     private router: Router
   ) { }
@@ -27,7 +27,7 @@ export class HomeLessonComponent implements OnInit {
   ngOnInit(): void {
     this.subject$ = this.route.params.pipe(
       tap(params => this.courseId = params['id']),
-      switchMap(params => this.courseService.getCourseById(params['id']))
+      switchMap(params => this.subjectService.getSubjectById(params['id']))
     );
   }
 

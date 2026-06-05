@@ -1,32 +1,78 @@
 <header class="header">
   <!-- Logo -->
   <div class="logo">
-    <a class="tech-link" routerLink="">
+    <a class="tech-link logo-link" routerLink="">
       <span>⚙️</span>
     </a>
-    <a class="tech-link" routerLink="/course">
+    <a class="tech-link logo-link" routerLink="/course">
       <span>DevTutorials</span>
     </a>
   </div>
 
-  <!-- Tech Nav Icons -->
-  <nav class="tech-nav">
-    @if (subjects$ | async; as subjects) {
-    @for (subject of subjects; track subject.id) {
-    <a class="tech-link" [routerLink]="['/course', subject.id]">
-      {{ subject.name }}
-    </a>
-    }
-    }
-    <a class="tech-link" routerLink="/course/lesson/create">
-      <span>Share Knowledge</span>
-    </a>
-  </nav>
-  
-  <!-- Auth Buttons -->
+  <!-- Tech Nav with arrows -->
+  <div class="tech-nav-wrapper">
+    <button type="button"
+            class="nav-arrow"
+            (click)="scrollPrev()"
+            [disabled]="!canScrollLeft"
+            aria-label="Previous subjects">‹</button>
+
+    <nav #navScroll class="tech-nav" (scroll)="onScroll()">
+      @if (subjects$ | async; as subjects) {
+        @for (subject of subjects; track subject.id) {
+          <a class="tech-link" [routerLink]="['/course', subject.id]">
+            {{ subject.name }}
+          </a>
+        }
+      }
+      <a class="tech-link share-link" routerLink="/course/lesson/create">
+        <span>Share Knowledge</span>
+      </a>
+    </nav>
+
+    <button type="button"
+            class="nav-arrow"
+            (click)="scrollNext()"
+            [disabled]="!canScrollRight"
+            aria-label="Next subjects">›</button>
+  </div>
+
+  <!-- Auth area -->
   <div class="auth-buttons">
-    
-    <a routerLink="/signin" class="auth-button">Sign In</a>
-    <a routerLink="/signup" class="auth-button">Sign Up</a>
+    @if (authService.currentUser(); as user) {
+      <div #profileMenu class="profile-menu">
+        <button type="button"
+                class="profile-trigger"
+                (click)="toggleProfileMenu($event)"
+                [attr.aria-expanded]="profileMenuOpen"
+                aria-haspopup="menu"
+                aria-label="Open profile menu">
+          <span class="avatar-circle">{{ userInitial }}</span>
+        </button>
+
+        @if (profileMenuOpen) {
+          <div class="profile-dropdown" role="menu" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span class="dropdown-name">{{ user.username }}</span>
+              <span class="dropdown-email">{{ user.email }}</span>
+            </div>
+            <a class="dropdown-item"
+               role="menuitem"
+               routerLink="/profile"
+               (click)="closeProfileMenu()">
+              <span class="item-icon">👤</span>
+              <span>View Profile</span>
+            </a>
+            <button type="button" class="dropdown-item danger" role="menuitem" (click)="logout()">
+              <span class="item-icon">⎋</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        }
+      </div>
+    } @else {
+      <button type="button" class="auth-button" (click)="openAuthModal('login')">Sign In</button>
+      <button type="button" class="auth-button" (click)="openAuthModal('signup')">Sign Up</button>
+    }
   </div>
 </header>

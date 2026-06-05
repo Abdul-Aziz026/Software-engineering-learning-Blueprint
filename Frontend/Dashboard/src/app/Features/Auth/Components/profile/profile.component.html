@@ -1,0 +1,98 @@
+<div class="profile-page">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar">{{ initial }}</div>
+      <div class="identity">
+        <h1>{{ authService.currentUser()?.username }}</h1>
+        <p>{{ authService.currentUser()?.email }}</p>
+      </div>
+      @if (!isEditing) {
+        <button type="button" class="primary-btn" (click)="startEdit()">Edit Profile</button>
+      }
+    </div>
+
+    @if (successMessage) {
+      <div class="alert success">{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="alert error">{{ errorMessage }}</div>
+    }
+
+    @if (!isEditing) {
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="label">Username</span>
+          <span class="value">{{ username }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Email</span>
+          <span class="value">{{ email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Password</span>
+          <span class="value">••••••••</span>
+        </div>
+      </div>
+    } @else {
+      <form #profileForm="ngForm" (ngSubmit)="save(profileForm)" novalidate>
+        <label class="field">
+          <span>Username</span>
+          <input type="text"
+                 name="username"
+                 [(ngModel)]="username"
+                 required
+                 minlength="3"
+                 maxlength="40"
+                 autocomplete="username" />
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input type="email"
+                 name="email"
+                 [(ngModel)]="email"
+                 required
+                 autocomplete="email" />
+        </label>
+
+        <fieldset class="password-section">
+          <legend>Change Password (optional)</legend>
+
+          <label class="field">
+            <span>Current Password</span>
+            <input type="password"
+                   name="currentPassword"
+                   [(ngModel)]="currentPassword"
+                   autocomplete="current-password"
+                   [required]="!!newPassword"
+                   placeholder="Required to change password" />
+          </label>
+
+          <label class="field">
+            <span>New Password</span>
+            <input type="password"
+                   name="newPassword"
+                   [(ngModel)]="newPassword"
+                   minlength="3"
+                   autocomplete="new-password"
+                   placeholder="Leave blank to keep current" />
+          </label>
+
+          <p class="hint">Min 3 chars, must include a letter, a number, and a special character.</p>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button"
+                  class="secondary-btn"
+                  (click)="cancelEdit()"
+                  [disabled]="isSubmitting">Cancel</button>
+          <button type="submit"
+                  class="primary-btn"
+                  [disabled]="profileForm.invalid || isSubmitting">
+            {{ isSubmitting ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

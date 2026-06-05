@@ -4,6 +4,7 @@ import { filter, Subscription } from 'rxjs';
 import { HeaderComponent } from '../../Shared/Components/header-component/header-component';
 import { FooterComponent } from '../../Shared/Components/footer-component/footer-component';
 import { SidebarComponent } from '../../Shared/Components/sidebar-component/sidebar-component';
+import { AuthModalComponent } from '../../Features/Auth/Components/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-course-layout-component',
@@ -11,6 +12,7 @@ import { SidebarComponent } from '../../Shared/Components/sidebar-component/side
     HeaderComponent,
     FooterComponent,
     SidebarComponent,
+    AuthModalComponent,
     RouterOutlet
   ],
   templateUrl: './course-layout-component.html',

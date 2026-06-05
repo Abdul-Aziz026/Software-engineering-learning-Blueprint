@@ -30,33 +30,10 @@ export const subjectReducer = createReducer(
         error
     })),
 
-    // Create Subject
-    on(SubjectActions.createSubjectSuccess, (state) => ({
-        ...state,
-        loading: true
-    })),
-    on(SubjectActions.createSubjectFailure, (state, { error }) => ({
-        ...state,
-        error
-    })),
-
-    // Update Subject
-    on(SubjectActions.updateSubjectSuccess, (state) => ({
-        ...state,
-        loading: true
-    })),
-    on(SubjectActions.updateSubjectFailure, (state, { error }) => ({
-        ...state,
-        error
-    })),
-
-    // Delete Subject
-    on(SubjectActions.deleteSubjectSuccess, (state) => ({
-        ...state,
-        loading: true
-    })),
-    on(SubjectActions.deleteSubjectFailure, (state, { error }) => ({
-        ...state,
-        error
-    }))
+    // Create / Update / Delete — the effect re-dispatches loadSubjects on success,
+    // so loading is driven by the load cycle. Only track errors here.
+    on(SubjectActions.createSubjectFailure,
+       SubjectActions.updateSubjectFailure,
+       SubjectActions.deleteSubjectFailure,
+       (state, { error }) => ({ ...state, error }))
 );

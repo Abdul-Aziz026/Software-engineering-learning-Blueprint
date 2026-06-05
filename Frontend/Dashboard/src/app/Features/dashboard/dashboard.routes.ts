@@ -14,4 +14,8 @@ export const DashboardRoutes: Routes = [
         path: 'course/lesson/create',
         loadComponent: () => import('../Courses/Components/lesson-create-component/lesson-create-component').then(o => o.LessonCreateComponent)
     },
+    {
+        path: 'profile',
+        loadComponent: () => import('../Auth/Components/profile/profile.component').then(o => o.ProfileComponent)
+    },
 ];

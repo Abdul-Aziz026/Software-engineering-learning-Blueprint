@@ -13,58 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 public class CourseController : ControllerBase
 {
     private readonly IMessageBus _messageBus;
-    List<CourseResponseDto> subjects = new()
-    {
-        new CourseResponseDto
-        {
-            Id = "csharp",
-            Name = "C#",
-            Description = "C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of beginneer to intermediate C# Fundametals of " +
-            "beginneer to intermediate C# Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "asp_net_core",
-            Name = "Asp.net Core",
-            Description = "Asp.net Core Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "docker",
-            Name = "Docker File",
-            Description = "Docker File Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "angular",
-            Name = "Angular",
-            Description = "Angular Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "1234567",
-            Name = "Networking",
-            Description = "Networking Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "12345678",
-            Name = "SQL",
-            Description = "SQL Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "123456789",
-            Name = "MongoDB",
-            Description = "MongoDB Fundametals of beginneer to intermediate"
-        },
-        new CourseResponseDto
-        {
-            Id = "1234567890",
-            Name = "Git",
-            Description = "Git Fundametals of beginneer to intermediate"
-        }
-    };
 
     public CourseController(IMessageBus messageBus)
     {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardService } from '../../Services/dashboard.service';
+import { DashboardService, GreetMessage } from '../../Services/dashboard.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -10,11 +10,11 @@ import { Observable } from 'rxjs';
   styleUrl: './dashboard-home.scss',
 })
 export class DashboardHome implements OnInit {
-  greetMessage$!: Observable<any>;
+  greetMessage$!: Observable<GreetMessage>;
 
-  constructor(private dashboardservice: DashboardService) {}
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
-    this.greetMessage$ = this.dashboardservice.getGreetMessage();
+    this.greetMessage$ = this.dashboardService.getGreetMessage();
   }
 }

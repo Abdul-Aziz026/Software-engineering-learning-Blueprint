@@ -11,10 +11,10 @@ export interface ChatThreadInfo {
 }
 
 export interface ToolCallRecord {
-  Id: number;
-  ToolName: string;
-  Arguments: string;
-  Result: string;
+  id: number;
+  toolName: string;
+  arguments: string;
+  result: string;
 }
 
 export interface ChatResponseDto {

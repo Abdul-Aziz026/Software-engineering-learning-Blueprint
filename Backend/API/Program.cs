@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.MiddleWare;
 using Application.Common.Interfaces.Services;
 using Infrastructure.Chat;
 using Infrastructure.Configuration;
@@ -65,6 +66,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 // authentication & authorization middlewares...
 app.UseAuthentication();
 app.UseAuthorization();

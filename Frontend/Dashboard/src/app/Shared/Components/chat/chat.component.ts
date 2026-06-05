@@ -33,10 +33,6 @@ export class ChatComponent {
   newMessage = '';
   selectedProvider: number = 0; // 0 = Gemini, 1 = Claude
   messages: Message[] = [];
-  // messages: Message[] = [
-  //   { text: 'Hello! How can I help you grow in the AI world today?', sender: 'ai', time: new Date() }
-  // ];
-
 
   constructor(private chatService: ChatService,
               private cd: ChangeDetectorRef

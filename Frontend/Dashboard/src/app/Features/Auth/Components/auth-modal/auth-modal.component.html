@@ -1,0 +1,102 @@
+@if (modal.isOpen()) {
+<div class="auth-backdrop" (click)="onBackdropClick($event)">
+  <div class="auth-modal" role="dialog" aria-modal="true">
+    <button class="close-btn" type="button" (click)="close()" aria-label="Close">×</button>
+
+    <div class="auth-tabs">
+      <button type="button"
+              class="tab"
+              [class.active]="modal.mode() === 'login'"
+              (click)="switchMode('login')">Sign In</button>
+      <button type="button"
+              class="tab"
+              [class.active]="modal.mode() === 'signup'"
+              (click)="switchMode('signup')">Sign Up</button>
+    </div>
+
+    <h2 class="auth-title">
+      {{ modal.mode() === 'signup' ? 'Create your account' : 'Welcome back' }}
+    </h2>
+    <p class="auth-subtitle">
+      {{ modal.mode() === 'signup' ? 'Sign up to start sharing knowledge.' : 'Sign in to continue learning.' }}
+    </p>
+
+    <form #authForm="ngForm" (ngSubmit)="submit(authForm)" novalidate>
+      @if (modal.mode() === 'signup') {
+        <label class="field">
+          <span>Username</span>
+          <input type="text"
+                 name="username"
+                 [(ngModel)]="username"
+                 required
+                 minlength="3"
+                 maxlength="40"
+                 autocomplete="username"
+                 placeholder="your_username" />
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input type="email"
+                 name="email"
+                 [(ngModel)]="email"
+                 required
+                 autocomplete="email"
+                 placeholder="you@example.com" />
+        </label>
+      } @else {
+        <label class="field">
+          <span>Email or Username</span>
+          <input type="text"
+                 name="emailOrUsername"
+                 [(ngModel)]="emailOrUsername"
+                 required
+                 autocomplete="username"
+                 placeholder="you@example.com" />
+        </label>
+      }
+
+      <label class="field">
+        <span>Password</span>
+        <input type="password"
+               name="password"
+               [(ngModel)]="password"
+               required
+               minlength="3"
+               autocomplete="{{ modal.mode() === 'signup' ? 'new-password' : 'current-password' }}"
+               placeholder="••••••••" />
+      </label>
+
+      @if (modal.mode() === 'signup') {
+        <p class="hint">
+          Min 3 chars, must include a letter, a number, and a special character.
+        </p>
+      }
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <button type="submit"
+              class="submit-btn"
+              [disabled]="authForm.invalid || isSubmitting">
+        @if (isSubmitting) {
+          <span>Please wait…</span>
+        } @else {
+          <span>{{ modal.mode() === 'signup' ? 'Create account' : 'Sign in' }}</span>
+        }
+      </button>
+    </form>
+
+    <p class="switch-line">
+      @if (modal.mode() === 'signup') {
+        Already have an account?
+        <button type="button" class="link-btn" (click)="switchMode('login')">Sign in</button>
+      } @else {
+        Don't have an account?
+        <button type="button" class="link-btn" (click)="switchMode('signup')">Sign up</button>
+      }
+    </p>
+  </div>
+</div>
+}

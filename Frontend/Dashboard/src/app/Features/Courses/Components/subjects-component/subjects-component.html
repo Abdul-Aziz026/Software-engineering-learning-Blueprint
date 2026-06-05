@@ -30,16 +30,23 @@
 
     <div class="subjects-grid">
         @for (subject of (subjects$ | async); track subject.id) {
-        <div class="subject-card">
+        <div class="subject-card"
+             role="link"
+             tabindex="0"
+             (click)="openSubject(subject.id)"
+             (keydown.enter)="openSubject(subject.id)"
+             (keydown.space)="openSubject(subject.id)">
             <div class="card-header">
                 <h3>{{subject.name}}</h3>
             </div>
             <div class="card-content">
                 <p>{{subject.description}}</p>
             </div>
-            <div class="card-actions">
-                <button class="btn btn-sm btn-secondary" (click)="editSubject(subject)">Edit</button>
-                <button class="btn btn-sm btn-danger" (click)="deleteSubject(subject.id)">Delete</button>
+            <div class="card-actions" (click)="$event.stopPropagation()">
+                <button class="btn btn-sm btn-secondary"
+                        (click)="$event.stopPropagation(); editSubject(subject)">Edit</button>
+                <button class="btn btn-sm btn-danger"
+                        (click)="$event.stopPropagation(); deleteSubject(subject.id)">Delete</button>
             </div>
         </div>
         }
