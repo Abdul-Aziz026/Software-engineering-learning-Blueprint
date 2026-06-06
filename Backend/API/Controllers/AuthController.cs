@@ -1,4 +1,6 @@
 using Application.Common.Interfaces.Publisher;
+using Application.Features.Auth.Commands.ForgotPassword;
+using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Commands.Signup;
 using Application.Features.Auth.Commands.UpdateProfile;
 using Application.Features.Auth.DTOs;
@@ -36,6 +38,25 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
     {
         var response = await _messageBus.SendAsync<LoginQuery, AuthResponseDto>(request.ToLoginQuery());
+        return Ok(response);
+    }
+
+    /// <summary>Request a password reset link by email. Always returns 200 (no account enumeration).</summary>
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<MessageResponseDto>> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+    {
+        var response = await _messageBus.SendAsync<ForgotPasswordCommand, MessageResponseDto>(request.ToForgotPasswordCommand());
+        return Ok(response);
+    }
+
+    /// <summary>Set a new password using a token from the reset email.</summary>
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<MessageResponseDto>> ResetPassword([FromBody] ResetPasswordRequestDto request)
+    {
+        var response = await _messageBus.SendAsync<ResetPasswordCommand, MessageResponseDto>(request.ToResetPasswordCommand());
         return Ok(response);
     }
 

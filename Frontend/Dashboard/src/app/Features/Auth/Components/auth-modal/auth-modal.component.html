@@ -3,22 +3,32 @@
   <div class="auth-modal" role="dialog" aria-modal="true">
     <button class="close-btn" type="button" (click)="close()" aria-label="Close">×</button>
 
-    <div class="auth-tabs">
-      <button type="button"
-              class="tab"
-              [class.active]="modal.mode() === 'login'"
-              (click)="switchMode('login')">Sign In</button>
-      <button type="button"
-              class="tab"
-              [class.active]="modal.mode() === 'signup'"
-              (click)="switchMode('signup')">Sign Up</button>
-    </div>
+    @if (modal.mode() !== 'forgot') {
+      <div class="auth-tabs">
+        <button type="button"
+                class="tab"
+                [class.active]="modal.mode() === 'login'"
+                (click)="switchMode('login')">Sign In</button>
+        <button type="button"
+                class="tab"
+                [class.active]="modal.mode() === 'signup'"
+                (click)="switchMode('signup')">Sign Up</button>
+      </div>
+    }
 
     <h2 class="auth-title">
-      {{ modal.mode() === 'signup' ? 'Create your account' : 'Welcome back' }}
+      @switch (modal.mode()) {
+        @case ('signup') { Create your account }
+        @case ('forgot') { Reset your password }
+        @default { Welcome back }
+      }
     </h2>
     <p class="auth-subtitle">
-      {{ modal.mode() === 'signup' ? 'Sign up to start sharing knowledge.' : 'Sign in to continue learning.' }}
+      @switch (modal.mode()) {
+        @case ('signup') { Sign up to start sharing knowledge. }
+        @case ('forgot') { Enter your email and we'll send you a reset link. }
+        @default { Sign in to continue learning. }
+      }
     </p>
 
     <form #authForm="ngForm" (ngSubmit)="submit(authForm)" novalidate>
@@ -44,6 +54,16 @@
                  autocomplete="email"
                  placeholder="you@example.com" />
         </label>
+      } @else if (modal.mode() === 'forgot') {
+        <label class="field">
+          <span>Email</span>
+          <input type="email"
+                 name="email"
+                 [(ngModel)]="email"
+                 required
+                 autocomplete="email"
+                 placeholder="you@example.com" />
+        </label>
       } @else {
         <label class="field">
           <span>Email or Username</span>
@@ -56,16 +76,24 @@
         </label>
       }
 
-      <label class="field">
-        <span>Password</span>
-        <input type="password"
-               name="password"
-               [(ngModel)]="password"
-               required
-               minlength="3"
-               autocomplete="{{ modal.mode() === 'signup' ? 'new-password' : 'current-password' }}"
-               placeholder="••••••••" />
-      </label>
+      @if (modal.mode() !== 'forgot') {
+        <label class="field">
+          <span>Password</span>
+          <input type="password"
+                 name="password"
+                 [(ngModel)]="password"
+                 required
+                 minlength="3"
+                 autocomplete="{{ modal.mode() === 'signup' ? 'new-password' : 'current-password' }}"
+                 placeholder="••••••••" />
+        </label>
+      }
+
+      @if (modal.mode() === 'login') {
+        <p class="forgot-line">
+          <button type="button" class="link-btn" (click)="switchMode('forgot')">Forgot password?</button>
+        </p>
+      }
 
       @if (modal.mode() === 'signup') {
         <p class="hint">
@@ -77,24 +105,41 @@
         <p class="error-message">{{ errorMessage }}</p>
       }
 
+      @if (infoMessage) {
+        <p class="info-message">{{ infoMessage }}</p>
+      }
+
       <button type="submit"
               class="submit-btn"
               [disabled]="authForm.invalid || isSubmitting">
         @if (isSubmitting) {
           <span>Please wait…</span>
         } @else {
-          <span>{{ modal.mode() === 'signup' ? 'Create account' : 'Sign in' }}</span>
+          <span>
+            @switch (modal.mode()) {
+              @case ('signup') { Create account }
+              @case ('forgot') { Send reset link }
+              @default { Sign in }
+            }
+          </span>
         }
       </button>
     </form>
 
     <p class="switch-line">
-      @if (modal.mode() === 'signup') {
-        Already have an account?
-        <button type="button" class="link-btn" (click)="switchMode('login')">Sign in</button>
-      } @else {
-        Don't have an account?
-        <button type="button" class="link-btn" (click)="switchMode('signup')">Sign up</button>
+      @switch (modal.mode()) {
+        @case ('signup') {
+          Already have an account?
+          <button type="button" class="link-btn" (click)="switchMode('login')">Sign in</button>
+        }
+        @case ('forgot') {
+          Remembered it?
+          <button type="button" class="link-btn" (click)="switchMode('login')">Back to sign in</button>
+        }
+        @default {
+          Don't have an account?
+          <button type="button" class="link-btn" (click)="switchMode('signup')">Sign up</button>
+        }
       }
     </p>
   </div>

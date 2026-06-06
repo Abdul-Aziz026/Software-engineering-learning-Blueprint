@@ -1,6 +1,7 @@
 using API.Extensions;
 using API.MiddleWare;
 using Application.Common.Interfaces.Services;
+using Application.Settings;
 using Infrastructure.Chat;
 using Infrastructure.Configuration;
 using Infrastructure.Llm;
@@ -9,6 +10,7 @@ using Infrastructure.Services;
 using Infrastructure.SignalR.Hubs;
 using Infrastructure.SignalR.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,13 @@ builder.Services.AddMediatRAndMasstransit();
 builder.Services.Configure<McpServerOptions>(builder.Configuration.GetSection("McpServer"));
 builder.Services.Configure<GeminiOptions>(builder.Configuration.GetSection("GeminiOptions"));
 builder.Services.Configure<ClaudeOptions>(builder.Configuration.GetSection("ClaudeOptions"));
+
+// Password recovery: Brevo email transport + reset-token settings.
+builder.Services.Configure<BrevoEmailOptions>(builder.Configuration.GetSection("BrevoEmail"));
+builder.Services.Configure<PasswordResetOptions>(builder.Configuration.GetSection("Auth:PasswordReset"));
+// Expose PasswordResetOptions as a plain value so the Application-layer handler needn't depend on IOptions.
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<PasswordResetOptions>>().Value);
+builder.Services.AddHttpClient<IEmailSender, BrevoEmailSender>();
 
 builder.Services.AddSingleton<IChatHistoryStore, MongoChatHistoryStore>();
 builder.Services.AddMcpServer()

@@ -4,6 +4,12 @@ import { CourseLayoutComponent } from './Layouts/course-layout-component/course-
 
 export const routes: Routes = [
   {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./Features/Auth/Pages/reset-password/reset-password.component')
+        .then(m => m.ResetPasswordComponent)
+  },
+  {
     path: '',
     component: MainLayoutComponent,
     children: [

@@ -25,9 +25,6 @@
           </a>
         }
       }
-      <a class="tech-link share-link" routerLink="/course/lesson/create">
-        <span>Share Knowledge</span>
-      </a>
     </nav>
 
     <button type="button"
@@ -35,6 +32,16 @@
             (click)="scrollNext()"
             [disabled]="!canScrollRight"
             aria-label="Next subjects">›</button>
+
+    <!-- Fixed links: always visible, never scroll away with the subjects. -->
+    <div class="fixed-links">
+      <a class="tech-link" routerLink="/blog">
+        <span>Blog</span>
+      </a>
+      <a class="tech-link" routerLink="/course/lesson/create">
+        <span>Share Knowledge</span>
+      </a>
+    </div>
   </div>
 
   <!-- Auth area -->

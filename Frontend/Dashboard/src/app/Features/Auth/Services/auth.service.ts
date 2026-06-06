@@ -2,7 +2,15 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { ConfigService } from '../../../Core/Services/config.service';
-import { AuthResponse, LoginRequest, SignupRequest, UpdateProfileRequest } from '../Models/auth.model';
+import {
+  AuthResponse,
+  ForgotPasswordRequest,
+  LoginRequest,
+  MessageResponse,
+  ResetPasswordRequest,
+  SignupRequest,
+  UpdateProfileRequest
+} from '../Models/auth.model';
 
 const STORAGE_KEY = 'auth_user';
 
@@ -35,6 +43,14 @@ export class AuthService {
     return this.http.put<AuthResponse>(`${this.apiUrl}/users/${userId}`, payload).pipe(
       tap((user) => this.persistUser(user))
     );
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/forgot-password`, payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/reset-password`, payload);
   }
 
   logout(): void {

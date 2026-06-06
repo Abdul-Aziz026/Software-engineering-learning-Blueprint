@@ -15,6 +15,7 @@ import { AuthModalService, AuthMode } from '../../Services/auth-modal.service';
 export class AuthModalComponent {
   isSubmitting = false;
   errorMessage = '';
+  infoMessage = '';
 
   username = '';
   email = '';
@@ -31,6 +32,7 @@ export class AuthModalComponent {
     if (this.modal.mode() === mode) return;
     this.modal.switchMode(mode);
     this.errorMessage = '';
+    this.infoMessage = '';
   }
 
   close(): void {
@@ -46,7 +48,26 @@ export class AuthModalComponent {
     if (form.invalid || this.isSubmitting) return;
 
     this.errorMessage = '';
+    this.infoMessage = '';
     this.isSubmitting = true;
+
+    if (this.modal.mode() === 'forgot') {
+      this.authService.forgotPassword({ email: this.email.trim() }).subscribe({
+        next: (res) => {
+          this.isSubmitting = false;
+          // Generic success message — backend never reveals whether the email exists.
+          this.infoMessage = res?.message
+            ?? 'If an account exists for that email, a reset link has been sent.';
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSubmitting = false;
+          this.errorMessage = err.error?.message
+            ?? err.error?.details
+            ?? 'Something went wrong. Please try again.';
+        }
+      });
+      return;
+    }
 
     const request$ = this.modal.mode() === 'signup'
       ? this.authService.signup({
@@ -79,6 +100,7 @@ export class AuthModalComponent {
     this.emailOrUsername = '';
     this.password = '';
     this.errorMessage = '';
+    this.infoMessage = '';
     this.isSubmitting = false;
   }
 }

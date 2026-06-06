@@ -77,9 +77,13 @@
   }
 }
 
-.share-link {
-  margin-left: auto;
+.fixed-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
   padding-left: 1rem;
+  margin-left: 0.25rem;
   border-left: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
 }
 

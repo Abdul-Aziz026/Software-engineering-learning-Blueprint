@@ -30,4 +30,9 @@ public class UserRepository : Repository, IUserRepository
         return DbContext.GetItemByConditionAsync<User>(
             u => u.Email == normalized || u.Username == normalized);
     }
+
+    public Task<User?> GetByPasswordResetTokenHashAsync(string tokenHash)
+    {
+        return DbContext.GetItemByConditionAsync<User>(u => u.PasswordResetTokenHash == tokenHash);
+    }
 }
