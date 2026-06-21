@@ -30,56 +30,7 @@
   gap: 1.25rem;
 }
 
-.blog-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  box-shadow: var(--card-shadow);
-  backdrop-filter: blur(var(--blur-amount));
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-
-  &:hover,
-  &:focus-visible {
-    transform: translateY(-3px);
-    border-color: var(--accent-blue);
-    outline: none;
-  }
-
-  .card-title {
-    margin: 0;
-    font-size: 1.15rem;
-    color: var(--text-primary);
-  }
-
-  .card-summary {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .card-meta,
-  .card-stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-  }
-
-  .card-stats {
-    gap: 1rem;
-    justify-content: flex-start;
-  }
-}
+// .blog-card styles moved to blog-card.component (it now owns its own look).
 
 .empty-state {
   text-align: center;
