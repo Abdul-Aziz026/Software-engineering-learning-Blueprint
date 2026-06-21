@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { BlogService } from '../../Services/blog.service';
 import { BlogPostSummary } from '../../Models/blog.model';
 import { AuthService } from '../../../Auth/Services/auth.service';
 import { AuthModalService } from '../../../Auth/Services/auth-modal.service';
+import { BlogCardComponent } from '../blog-card/blog-card';
 
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [DatePipe],
+  imports: [BlogCardComponent],
   templateUrl: './blog-list.html',
   styleUrl: './blog-list.scss'
 })
