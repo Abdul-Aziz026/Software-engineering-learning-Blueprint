@@ -36,5 +36,22 @@ public sealed record Email
         return new Email(normalized);
     }
 
+    /// <summary>
+    /// Non-throwing variant of <see cref="Create"/>. Returns false for null, blank, or malformed input.
+    /// </summary>
+    public static bool TryCreate(string? input, out Email? email)
+    {
+        try
+        {
+            email = Create(input!);
+            return true;
+        }
+        catch (ValidationException)
+        {
+            email = null;
+            return false;
+        }
+    }
+
     public override string ToString() => Value;
 }

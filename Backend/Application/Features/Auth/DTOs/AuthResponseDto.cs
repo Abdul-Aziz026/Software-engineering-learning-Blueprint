@@ -12,6 +12,6 @@ public class AuthResponseDto
     {
         UserId = user.Id,
         Username = user.Username,
-        Email = user.Email
+        Email = user.Email.Value
     };
 }

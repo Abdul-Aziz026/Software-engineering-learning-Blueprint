@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Security;
 using Application.Features.Auth.DTOs;
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.UpdateProfile;
@@ -69,13 +70,13 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
         if (!_authValidator.IsValidEmail(newEmail))
             throw new ValidationException("Invalid email address.");
 
-        if (newEmail == user.Email) return false;
+        if (newEmail == user.Email.Value) return false;
 
         var conflict = await _userRepository.GetByEmailAsync(newEmail);
         if (conflict is not null && conflict.Id != user.Id)
             throw new ValidationException("This email is already in use.");
 
-        user.Email = newEmail;
+        user.Email = Email.Create(newEmail);
         return true;
     }
 
