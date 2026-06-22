@@ -1,6 +1,6 @@
 # Project Structure
 
-> Auto-generated on 2026-06-21
+> Auto-generated on 2026-06-22 (updated)
 
 ```
 Software-engineering-learning-Blueprint-fork/
@@ -8,6 +8,7 @@ Software-engineering-learning-Blueprint-fork/
 │   └── workflows/
 ├── .gitignore
 ├── docker-compose.yml
+├── DAILY_LEARNING_LOG.md
 ├── LEARNING_LOG.md
 ├── PROJECT_STRUCTURE.md
 ├── PROJECT_TECH_STACK.md
@@ -223,6 +224,8 @@ Software-engineering-learning-Blueprint-fork/
 │   │
 │   ├── Domain/
 │   │   ├── Domain.csproj
+│   │   ├── Common/
+│   │   │   └── ValueObject.cs
 │   │   ├── Entities/
 │   │   │   ├── BaseEntity.cs
 │   │   │   ├── BlogComment.cs
@@ -243,9 +246,11 @@ Software-engineering-learning-Blueprint-fork/
 │   │   │   └── ValidationException.cs
 │   │   ├── Interfaces/
 │   │   │   └── IUnitOfWork.cs
-│   │   └── Repositories/
-│   │       └── Base/
-│   │           └── IRepository.cs
+│   │   ├── Repositories/
+│   │   │   └── Base/
+│   │   │       └── IRepository.cs
+│   │   └── ValueObjects/
+│   │       └── Email.cs
 │   │
 │   ├── Infrastructure/
 │   │   ├── Infrastructure.csproj
@@ -269,7 +274,9 @@ Software-engineering-learning-Blueprint-fork/
 │   │   │   ├── McpService.cs
 │   │   │   └── McpStartupService.cs
 │   │   ├── Persistence/
-│   │   │   └── DatabaseContext.cs
+│   │   │   ├── DatabaseContext.cs
+│   │   │   └── Serializers/
+│   │   │       └── EmailSerializer.cs
 │   │   ├── Repositories/
 │   │   │   ├── Base/
 │   │   │   │   └── Repository.cs
@@ -295,10 +302,14 @@ Software-engineering-learning-Blueprint-fork/
 │
 └── Frontend/
     └── Dashboard/                          (Angular app)
+        ├── .editorconfig
+        ├── .gitignore
         ├── angular.json
         ├── Dockerfile
         ├── nginx.conf
         ├── package.json
+        ├── package-lock.json
+        ├── README.md
         ├── tsconfig.json
         ├── tsconfig.app.json
         ├── tsconfig.spec.json

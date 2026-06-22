@@ -51,7 +51,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
                 {
                     var resetLink = $"{_options.FrontendUrl.TrimEnd('/')}/reset-password?token={rawToken}";
                     await _emailSender.SendAsync(
-                        user.Email,
+                        user.Email.Value,
                         "Reset your password",
                         BuildEmailBody(user.Username, resetLink, _options.TokenExpiryMinutes),
                         cancellationToken);

@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Security;
 using Application.Features.Auth.DTOs;
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.ValueObjects;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.Signup;
@@ -51,7 +52,7 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
         var user = new User
         {
             Username = normalizedUsername,
-            Email = normalizedEmail,
+            Email = Email.Create(normalizedEmail),
             PasswordHash = hash,
             PasswordSalt = salt
         };

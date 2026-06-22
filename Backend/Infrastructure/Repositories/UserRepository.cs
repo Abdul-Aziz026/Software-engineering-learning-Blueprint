@@ -2,6 +2,7 @@
 using Application.Common.Interfaces.Persistence;
 using Application.Common.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.ValueObjects;
 using Infrastructure.Repositories.Base;
 
 namespace Infrastructure.Repositories;
@@ -14,8 +15,9 @@ public class UserRepository : Repository, IUserRepository
 
     public Task<User?> GetByEmailAsync(string email)
     {
-        var normalized = email.Trim().ToLowerInvariant();
-        return DbContext.GetItemByConditionAsync<User>(u => u.Email == normalized);
+        return Email.TryCreate(email, out var parsed)
+            ? DbContext.GetItemByConditionAsync<User>(u => u.Email == parsed)
+            : Task.FromResult<User?>(null);
     }
 
     public Task<User?> GetByUsernameAsync(string username)
@@ -27,8 +29,9 @@ public class UserRepository : Repository, IUserRepository
     public Task<User?> GetByEmailOrUsernameAsync(string emailOrUsername)
     {
         var normalized = emailOrUsername.Trim().ToLowerInvariant();
-        return DbContext.GetItemByConditionAsync<User>(
-            u => u.Email == normalized || u.Username == normalized);
+        return Email.TryCreate(normalized, out var email)
+            ? DbContext.GetItemByConditionAsync<User>(u => u.Email == email || u.Username == normalized)
+            : DbContext.GetItemByConditionAsync<User>(u => u.Username == normalized);
     }
 
     public Task<User?> GetByPasswordResetTokenHashAsync(string tokenHash)
