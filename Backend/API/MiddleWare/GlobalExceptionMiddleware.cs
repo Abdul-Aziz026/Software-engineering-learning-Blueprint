@@ -1,5 +1,8 @@
 using System.Text.Json;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+// Alias the FluentValidation one so the switch below can tell them apart.
+using FluentValidationException = FluentValidation.ValidationException;
 
 namespace API.MiddleWare;
 
@@ -28,26 +31,50 @@ public class GlobalExceptionMiddleware
 
     private Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var (statusCode, message) = exception switch
+        // Build an RFC 7807 ProblemDetails (or ValidationProblemDetails) per exception type.
+        ProblemDetails problem = exception switch
         {
-            ValidationException ve     => (StatusCodes.Status400BadRequest,  ve.Message),
-            AuthenticationException ae => (StatusCodes.Status401Unauthorized, ae.Message),
-            NotFoundException ne       => (StatusCodes.Status404NotFound,    ne.Message),
-            UnknownException ue        => (StatusCodes.Status500InternalServerError, ue.Message),
-            _                          => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+            // FluentValidation failures from the MediatR pipeline -> 400 with per-field errors.
+            FluentValidationException fve => new ValidationProblemDetails(
+                fve.Errors
+                   .GroupBy(e => e.PropertyName)
+                   .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()))
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title  = "One or more validation errors occurred.",
+                Type   = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
+            },
+
+            // Domain value-object validation (e.g. Email.Create) -> 400, single message.
+            ValidationException ve     => Problem(StatusCodes.Status400BadRequest,  "Validation failed",      ve.Message),
+            AuthenticationException ae => Problem(StatusCodes.Status401Unauthorized, "Authentication failed",  ae.Message),
+            NotFoundException ne       => Problem(StatusCodes.Status404NotFound,     "Resource not found",     ne.Message),
+            UnknownException ue        => Problem(StatusCodes.Status500InternalServerError, "Server error",   ue.Message),
+            _                          => Problem(StatusCodes.Status500InternalServerError, "Server error",   "Internal Server Error")
         };
+
+        var statusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
 
         if (statusCode >= 500)
             _logger.LogError(exception, "Unhandled exception at {Path}", context.Request.Path);
         else
             _logger.LogWarning(exception, "Handled domain exception at {Path}: {Message}", context.Request.Path, exception.Message);
 
-        context.Response.ContentType = "application/json";
+        problem.Instance = context.Request.Path;
+
+        // application/problem+json is the media type RFC 7807 mandates.
+        context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = statusCode;
 
-        var payload = new { statusCode, message };
-        return context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(problem, problem.GetType()));
     }
+
+    private static ProblemDetails Problem(int status, string title, string detail) => new()
+    {
+        Status = status,
+        Title  = title,
+        Detail = detail
+    };
 }
 
 public static class GlobalExceptionMiddlewareExtensions
