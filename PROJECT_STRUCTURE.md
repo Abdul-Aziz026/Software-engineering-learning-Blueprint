@@ -1,12 +1,13 @@
 # Project Structure
 
-> Auto-generated on 2026-06-23
+> Auto-generated on 2026-06-24
 
 ```
 Software-engineering-learning-Blueprint-fork/
 ├── .github/
 │   └── workflows/
 ├── .gitignore
+├── CLAUDE.md
 ├── docker-compose.yml
 ├── DAILY_LEARNING_LOG.md
 ├── LEARNING_LOG.md
@@ -83,7 +84,8 @@ Software-engineering-learning-Blueprint-fork/
 │   │   │   │   │   │   └── ResetPasswordCommandHandler.cs
 │   │   │   │   │   ├── Signup/
 │   │   │   │   │   │   ├── SignupCommand.cs
-│   │   │   │   │   │   └── SignupCommandHandler.cs
+│   │   │   │   │   │   ├── SignupCommandHandler.cs
+│   │   │   │   │   │   └── SignupCommandValidator.cs
 │   │   │   │   │   └── UpdateProfile/
 │   │   │   │   │       ├── UpdateProfileCommand.cs
 │   │   │   │   │       └── UpdateProfileCommandHandler.cs
@@ -298,6 +300,10 @@ Software-engineering-learning-Blueprint-fork/
 │   │
 │   └── Tests/
 │       ├── Tests.csproj
+│       ├── Application/
+│       │   └── Features/
+│       │       └── Auth/
+│       │           └── SignupCommandValidatorTests.cs
 │       └── Domain/
 │           └── ValueObjects/
 │               └── EmailTests.cs
