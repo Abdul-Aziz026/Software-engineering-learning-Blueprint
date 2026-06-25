@@ -1,9 +1,15 @@
 # Project Structure
 
-> Auto-generated on 2026-06-24
+> Auto-generated on 2026-06-25
 
 ```
 Software-engineering-learning-Blueprint-fork/
+├── .claude/
+│   ├── agents/
+│   │   ├── codebase-expert.md
+│   │   └── dev-planner.md
+│   ├── settings.local.json
+│   └── skills/
 ├── .github/
 │   └── workflows/
 ├── .gitignore
@@ -304,9 +310,14 @@ Software-engineering-learning-Blueprint-fork/
 │       │   └── Features/
 │       │       └── Auth/
 │       │           └── SignupCommandValidatorTests.cs
-│       └── Domain/
-│           └── ValueObjects/
-│               └── EmailTests.cs
+│       ├── Domain/
+│       │   └── ValueObjects/
+│       │       └── EmailTests.cs
+│       └── Integration/
+│           ├── IntegrationTestFactory.cs
+│           └── Auth/
+│               ├── SignupEndpointValidationTests.cs
+│               └── SignupPersistenceTests.cs
 │
 └── Frontend/
     └── Dashboard/                          (Angular app)
