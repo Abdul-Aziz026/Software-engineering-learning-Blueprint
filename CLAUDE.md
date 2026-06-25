@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> Always answer in Bangla + English (mixed) language.
+> Always answer in English (mixed) language.
 
 ## Project
 
@@ -12,13 +12,13 @@ A full-stack, AI-powered learning platform. Backend is ASP.NET Core (.NET 10) in
 
 ### Backend (run from `Backend/`)
 ```bash
-dotnet build "backend BluePrint.sln"        # build whole solution
+dotnet build BackendBluePrint.slnx          # build whole solution
 dotnet run --project API                    # run the Web API (Swagger at /swagger in Development)
 dotnet test                                 # run all xUnit tests
 dotnet test --filter "FullyQualifiedName~EmailTests"          # run one test class
 dotnet test --filter "FullyQualifiedName~SignupCommandValidatorTests.Validate_Fails_When_Email_Invalid"  # run one test
 ```
-Tests live in `Backend/Tests/` (xUnit). The test project references only `Domain` and `Application` — keep tests off Infrastructure/API.
+Tests live in `Backend/Tests/` (xUnit). **Unit** tests reference only `Domain` and `Application` — keep them off Infrastructure/API. **Exception:** integration tests under `Backend/Tests/Integration/` legitimately reference `API` (and transitively Infrastructure) to boot the real host via `WebApplicationFactory<Program>`, and require Docker (Testcontainers spins up a throwaway MongoDB). Run integration tests with `dotnet test --filter "FullyQualifiedName~Integration"`.
 
 ### Frontend (run from `Frontend/Dashboard/`)
 ```bash
