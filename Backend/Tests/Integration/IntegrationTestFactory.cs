@@ -1,8 +1,6 @@
-using Infrastructure.MCP;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.MongoDb;
 
 namespace Tests.Integration;
@@ -14,8 +12,9 @@ namespace Tests.Integration;
 ///   <c>MongoSettings:ConnectionString</c>/<c>DatabaseName</c> at it via in-memory config,
 ///   so <c>IOptions&lt;MongoSettings&gt;</c> picks it up without re-registering the singleton
 ///   repositories.
-/// - Removes McpStartupService (it dials the in-process /mcp endpoint on boot) — these tests
-///   don't need it. Tests that exercise the chat/agentic endpoint must wire MCP up separately.
+///
+/// The MCP client connects lazily on first use, so it stays dormant for tests that don't exercise
+/// the chat/agentic endpoint — no special teardown needed here.
 ///
 /// Shared across all integration test classes via the "integration" collection, so the
 /// container starts once per test run rather than per class.
@@ -44,17 +43,6 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
             ["MongoSettings:ConnectionString"] = _mongo.GetConnectionString(),
             ["MongoSettings:DatabaseName"] = "itest",
         }));
-
-        builder.ConfigureServices(services =>
-        {
-            // Remove only McpStartupService — it dials the in-process /mcp endpoint on boot and is
-            // irrelevant to these tests. Other hosted services are left intact so we don't silently
-            // disable unrelated wiring. (Chat/agentic-endpoint tests would need MCP wired separately.)
-            foreach (var d in services
-                         .Where(d => d.ImplementationType == typeof(McpStartupService))
-                         .ToList())
-                services.Remove(d);
-        });
     }
 }
 

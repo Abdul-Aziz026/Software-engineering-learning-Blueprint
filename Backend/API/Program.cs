@@ -38,9 +38,8 @@ builder.Services.AddMcpServer()
     .AddAuthorizationFilters()
     .WithToolsFromAssembly(typeof(Application.Tools.TutorialTools).Assembly);
 
+// Singleton MCP client; connects lazily on first use and is disposed (IAsyncDisposable) on host shutdown.
 builder.Services.AddSingleton<IMcpService, McpService>();
-// After Kestrel is listening, connect in-process MCP client to MapMcp endpoint.
-builder.Services.AddHostedService<McpStartupService>();
 builder.Services.AddSingleton<ILlmFactory, LlmFactory>();
 
 builder.Services.AddSignalR();
