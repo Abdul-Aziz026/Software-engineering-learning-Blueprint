@@ -1,21 +1,15 @@
-
 using Microsoft.Extensions.AI;
-using ModelContextProtocol.Client;
 
 namespace Application.Common.Interfaces.Services;
 
 public interface IMcpService
 {
-    // connects to the MCP server
-    Task ConnectAsync(CancellationToken ct = default);
+    // Tools the connected MCP server exposes (connects on first use).
+    Task<IReadOnlyList<AITool>> GetToolsAsync(CancellationToken ct = default);
 
-    Task DisconnectAsync(CancellationToken ct = default);
-    // Get the list of tools the MCP server exposes
-    Task<List<AITool>> GetToolsAsync(CancellationToken ct = default);
-
-    // Executes a named tool with the given arguments, returns text result
+    // Executes a named tool with the given arguments, returns its text result (connects on first use).
     Task<string> CallToolAsync(
                         string toolName,
                         Dictionary<string, object?> arguments,
-                        CancellationToken ct);
+                        CancellationToken ct = default);
 }
