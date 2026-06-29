@@ -14,6 +14,12 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Console logging: print scope properties (CorrelationId, Username, ...) on every log line.
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.IncludeScopes = true;
+});
+
 builder.Services.AddConfigurationSettings(builder.Configuration);
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
@@ -65,6 +71,11 @@ builder.Services.AddAuthentication();
 // builder.Services.AddHostedService<HeartbitTestJob>();
 
 var app = builder.Build();
+
+// Outermost middleware: open a CorrelationId log scope FIRST so every later log line
+// (including the exception middleware's) carries the same id, and the id is set on
+app.UseCorrelationId();
+
 app.UseCors("AllowAngular");
 
 if (app.Environment.IsDevelopment())

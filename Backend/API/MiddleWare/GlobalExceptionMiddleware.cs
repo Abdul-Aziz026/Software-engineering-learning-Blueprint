@@ -62,6 +62,14 @@ public class GlobalExceptionMiddleware
 
         problem.Instance = context.Request.Path;
 
+        // Echo the per-request correlation id (set by CorrelationIdMiddleware) into the body
+        // grep the structured logs for the exact failing request.
+        if (context.Items.TryGetValue(CorrelationIdMiddleware.HeaderName, out var correlationId)
+            && correlationId is string id)
+        {
+            problem.Extensions["correlationId"] = id;
+        }
+
         // application/problem+json is the media type RFC 7807 mandates.
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = statusCode;
