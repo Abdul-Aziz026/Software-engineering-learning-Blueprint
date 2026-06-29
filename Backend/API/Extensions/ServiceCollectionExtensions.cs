@@ -28,8 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBlogCommentRepository, BlogCommentRepository>();
         services.AddSingleton<IBlogLikeRepository, BlogLikeRepository>();
 
-        // Message bus
-        services.AddSingleton<IMessageBus, MessageBus>();
+        services.AddScoped<IMessageBus, MessageBus>();
 
         // Auth / security services
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
