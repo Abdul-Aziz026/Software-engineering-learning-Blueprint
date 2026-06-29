@@ -22,7 +22,7 @@ builder.Logging.AddSimpleConsole(options =>
 
 builder.Services.AddConfigurationSettings(builder.Configuration);
 builder.Services.AddSwaggerGen();
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddMediatRAndMasstransit();
 
 

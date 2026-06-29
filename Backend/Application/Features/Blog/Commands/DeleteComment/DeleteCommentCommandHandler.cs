@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
@@ -9,13 +10,16 @@ public class DeleteCommentCommandHandler : IRequestHandler<DeleteCommentCommand>
 {
     private readonly IBlogPostRepository _blogPostRepository;
     private readonly IBlogCommentRepository _blogCommentRepository;
+    private readonly ICacheService _cache;
 
     public DeleteCommentCommandHandler(
         IBlogPostRepository blogPostRepository,
-        IBlogCommentRepository blogCommentRepository)
+        IBlogCommentRepository blogCommentRepository,
+        ICacheService cache)
     {
         _blogPostRepository = blogPostRepository;
         _blogCommentRepository = blogCommentRepository;
+        _cache = cache;
     }
 
     public async Task Handle(DeleteCommentCommand request, CancellationToken cancellationToken)
@@ -34,5 +38,8 @@ public class DeleteCommentCommandHandler : IRequestHandler<DeleteCommentCommand>
             post.CommentCount -= 1;
             await _blogPostRepository.UpdateAsync(post);
         }
+
+        // The deleted comment lives inside the cached snapshot — evict it.
+        await _cache.RemoveAsync(BlogCacheKeys.Detail(comment.BlogPostId), cancellationToken);
     }
 }
