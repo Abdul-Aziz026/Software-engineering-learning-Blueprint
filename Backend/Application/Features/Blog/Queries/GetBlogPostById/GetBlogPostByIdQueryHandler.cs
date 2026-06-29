@@ -14,9 +14,8 @@ public class GetBlogPostByIdQueryHandler : IRequestHandler<GetBlogPostByIdQuery,
     private readonly IBlogLikeRepository _blogLikeRepository;
     private readonly ICacheService _cache;
 
-    // for skipping Mongo, and write handlers should RemoveAsync this key on change.
+    // Short TTL bounds staleness; write handlers also evict via BlogCacheKeys.Detail.
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(60);
-    private static string CacheKey(string postId) => $"blogpost:detail:{postId}";
 
     public GetBlogPostByIdQueryHandler(
         IBlogPostRepository blogPostRepository,
@@ -32,7 +31,7 @@ public class GetBlogPostByIdQueryHandler : IRequestHandler<GetBlogPostByIdQuery,
 
     public async Task<BlogPostDetailDto> Handle(GetBlogPostByIdQuery request, CancellationToken cancellationToken)
     {
-        var key = CacheKey(request.Id);
+        var key = BlogCacheKeys.Detail(request.Id);
 
         // 1. Try cache. The snapshot never carries a per-user flag.
         var dto = await _cache.GetAsync<BlogPostDetailDto>(key, cancellationToken);

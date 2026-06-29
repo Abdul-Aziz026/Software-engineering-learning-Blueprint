@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
@@ -10,10 +11,12 @@ public class UpdateBlogPostCommandHandler : IRequestHandler<UpdateBlogPostComman
     private const int SummaryLength = 200;
 
     private readonly IBlogPostRepository _blogPostRepository;
+    private readonly ICacheService _cache;
 
-    public UpdateBlogPostCommandHandler(IBlogPostRepository blogPostRepository)
+    public UpdateBlogPostCommandHandler(IBlogPostRepository blogPostRepository, ICacheService cache)
     {
         _blogPostRepository = blogPostRepository;
+        _cache = cache;
     }
 
     public async Task Handle(UpdateBlogPostCommand request, CancellationToken cancellationToken)
@@ -35,6 +38,9 @@ public class UpdateBlogPostCommandHandler : IRequestHandler<UpdateBlogPostComman
         post.UpdatedAt = DateTime.UtcNow;
 
         await _blogPostRepository.UpdateAsync(post);
+
+        // The cached detail snapshot is now stale — evict it so the next read repopulates.
+        await _cache.RemoveAsync(BlogCacheKeys.Detail(post.Id), cancellationToken);
     }
 
     private static string BuildSummary(string? summary, string content)

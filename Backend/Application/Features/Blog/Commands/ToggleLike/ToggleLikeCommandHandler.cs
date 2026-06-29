@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Repositories;
+using Application.Common.Interfaces.Services;
 using Application.Features.Blog.DTOs;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -10,13 +11,16 @@ public class ToggleLikeCommandHandler : IRequestHandler<ToggleLikeCommand, Toggl
 {
     private readonly IBlogPostRepository _blogPostRepository;
     private readonly IBlogLikeRepository _blogLikeRepository;
+    private readonly ICacheService _cache;
 
     public ToggleLikeCommandHandler(
         IBlogPostRepository blogPostRepository,
-        IBlogLikeRepository blogLikeRepository)
+        IBlogLikeRepository blogLikeRepository,
+        ICacheService cache)
     {
         _blogPostRepository = blogPostRepository;
         _blogLikeRepository = blogLikeRepository;
+        _cache = cache;
     }
 
     public async Task<ToggleLikeResponseDto> Handle(ToggleLikeCommand request, CancellationToken cancellationToken)
@@ -46,6 +50,10 @@ public class ToggleLikeCommandHandler : IRequestHandler<ToggleLikeCommand, Toggl
         }
 
         await _blogPostRepository.UpdateAsync(post);
+
+        // LikeCount changed in the cached snapshot — evict it. (The per-user like flag
+        // is overlaid fresh after the cache read, so only the count needs invalidation.)
+        await _cache.RemoveAsync(BlogCacheKeys.Detail(post.Id), cancellationToken);
 
         return new ToggleLikeResponseDto
         {
