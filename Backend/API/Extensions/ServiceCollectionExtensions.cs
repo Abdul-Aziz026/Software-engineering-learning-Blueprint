@@ -15,10 +15,28 @@ namespace API.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(
+        this IServiceCollection services, IConfiguration configuration)
     {
         // Database
         services.AddSingleton<IDatabaseContext, DatabaseContext>();
+
+        // Distributed cache (Redis). If no connection string is configured we fall
+        // back to a process-local in-memory distributed cache so the app still runs
+        var redisConnection = configuration.GetConnectionString("Redis");
+        if (string.IsNullOrWhiteSpace(redisConnection))
+        {
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnection;
+                options.InstanceName = "blueprint:";
+            });
+        }
+        services.AddSingleton<ICacheService, RedisCacheService>();
 
         // Repositories
         services.AddSingleton<IRepository, Repository>();
