@@ -45,12 +45,10 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
         }
 
         var (hash, salt) = _passwordHasher.HashPassword(newPassword);
-        user.PasswordHash = hash;
-        user.PasswordSalt = salt;
 
-        // Single-use: invalidate the token so the link can't be replayed.
-        user.PasswordResetTokenHash = null;
-        user.PasswordResetTokenExpiresAt = null;
+        // Sets the new credentials AND clears the token in one step — the entity
+        // itself guarantees the reset link is single-use (can't be replayed).
+        user.CompletePasswordReset(hash, salt);
 
         var updated = await _userRepository.UpdateAsync(user);
         if (!updated)

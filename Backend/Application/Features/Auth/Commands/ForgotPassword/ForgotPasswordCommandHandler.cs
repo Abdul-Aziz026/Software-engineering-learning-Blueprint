@@ -41,9 +41,9 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
             if (user is not null)
             {
                 var rawToken = ResetTokenUtil.GenerateRawToken();
-                user.PasswordResetTokenHash = ResetTokenUtil.Hash(rawToken);
-                user.PasswordResetTokenExpiresAt =
-                    DateTime.UtcNow.AddMinutes(_options.TokenExpiryMinutes);
+                user.RequestPasswordReset(
+                    ResetTokenUtil.Hash(rawToken),
+                    DateTime.UtcNow.AddMinutes(_options.TokenExpiryMinutes));
 
                 await _userRepository.UpdateAsync(user);
 

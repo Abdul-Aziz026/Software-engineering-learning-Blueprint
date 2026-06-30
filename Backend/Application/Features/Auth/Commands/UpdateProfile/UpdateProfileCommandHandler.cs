@@ -58,7 +58,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
         if (conflict is not null && conflict.Id != user.Id)
             throw new ValidationException("This username is already taken.");
 
-        user.Username = newUsername;
+        user.Rename(newUsername);
         return true;
     }
 
@@ -76,7 +76,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
         if (conflict is not null && conflict.Id != user.Id)
             throw new ValidationException("This email is already in use.");
 
-        user.Email = Email.Create(newEmail);
+        user.ChangeEmail(Email.Create(newEmail));
         return true;
     }
 
@@ -93,8 +93,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
         _authValidator.ValidatePassword(newPassword);
 
         var (hash, salt) = _passwordHasher.HashPassword(newPassword);
-        user.PasswordHash = hash;
-        user.PasswordSalt = salt;
+        user.SetPassword(hash, salt);
         return true;
     }
 }
