@@ -58,13 +58,8 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
 
         var (hash, salt) = _passwordHasher.HashPassword(password);
 
-        var user = new User
-        {
-            Username = normalizedUsername,
-            Email = Email.Create(normalizedEmail),
-            PasswordHash = hash,
-            PasswordSalt = salt
-        };
+        // Creation invariants now live in the Domain entity, not here.
+        var user = User.Register(normalizedUsername, Email.Create(normalizedEmail), hash, salt);
 
         var added = await _userRepository.AddAsync(user);
         if (!added)
