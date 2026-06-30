@@ -36,17 +36,20 @@ docker compose up --build    # frontend → localhost:4200, backend → localhos
 ## Architecture
 
 ### Backend layering (dependency flow is inward only)
-`API` → `Infrastructure` → `Application` → `Domain`. `Domain` has **zero** external/framework dependencies. Never make `Application` or `Domain` depend on `Infrastructure` or `API`. Cross-layer references are always against an interface, never a concrete class.
+`API` → `Infrastructure` → `Application` → `Domain`. `Domain` has **zero** external/framework dependencies. Never make `Application` or `Domain` depend on `Infrastructure` or `API`. Cross-layer references are always against an interface, never a concrete class. All six projects target **`net10.0`**.
 
-- **Domain** — entities (`BaseEntity`, `User`, `BlogPost`, `Chapter`, `Subject`, `ChatThread`…), enums (`LlmProvider`, `NotificationType`), value objects (`Email`), exceptions, repository interfaces.
-- **Application** — CQRS feature slices under `Features/<Area>/{Commands,Queries}/<Name>/`, each with a `*Command`/`*Query`, its `*Handler`, and optional `*Validator`. Also holds DTOs, interface definitions (`Common/Interfaces/...`), and MCP tool authoring (`Tools/TutorialTools.cs`).
-- **Infrastructure** — concrete implementations: MongoDB (`Persistence/DatabaseContext.cs`, `Repositories/`), SignalR hub + notification service, LLM clients + `LlmFactory`, MCP service, MassTransit `MessageBus`, email (`BrevoEmailSender`), password hashing.
-- **API** — thin controllers, middleware, `Program.cs` DI wiring. Service registration is split into `Extensions/ServiceCollectionExtensions.cs` (repos/security) and `Extensions/MasstransitAndMediatRExtensions.cs` (MediatR + validators).
+- **Domain** — entities (`BaseEntity`, `User`, `BlogPost`, `Chapter`, `Subject`, `ChatThread`…), enums (`LlmProvider`, `NotificationType`), value objects (`Email`), exceptions, repository interfaces. References nothing.
+- **Application** — CQRS feature slices under `Features/<Area>/{Commands,Queries}/<Name>/`, each with a `*Command`/`*Query`, its `*Handler`, and optional `*Validator`. Also holds DTOs, interface definitions (`Common/Interfaces/...`), and MCP tool authoring (`Tools/TutorialTools.cs`). References `Domain` + `Contracts`.
+- **Contracts** — shared message contracts (for MassTransit). References nothing but MediatR; referenced by `Application` and `API`. It is *not* a layer in the inward-dependency rule — treat it as a leaf shared kernel.
+- **Infrastructure** — concrete implementations: MongoDB (`Persistence/DatabaseContext.cs`, `Repositories/`), Redis distributed cache, SignalR hub + notification service, LLM clients + `LlmFactory`, MCP service, MassTransit `MessageBus`, email (`BrevoEmailSender`), password hashing. References `Application` + `Domain`.
+- **API** — thin controllers, middleware, `Program.cs` DI wiring. Service registration is split across `Extensions/ServiceCollectionExtensions.cs` (repos/cache/security/message bus), `Extensions/MasstransitAndMediatRExtensions.cs` (MediatR + validators + `ValidationBehavior`), and `Extensions/ConfigurationSettingExtensions.cs` (options binding + BSON serializer registration). References `Application`, `Infrastructure`, `Contracts`.
 
 ### Request flow (CQRS)
 Controllers do **not** call MediatR directly. They inject `IMessageBus` (Infrastructure's `MessageBus`, which wraps MediatR) and call `SendAsync<TCommand, TResponse>(command)`. Every write is a `Command`, every read is a `Query`, each with a dedicated handler. Keep controllers thin — no business logic.
 
 Validation runs automatically: `ValidationBehavior<,>` is a MediatR pipeline behavior that executes every registered FluentValidation `AbstractValidator` before the handler. Validators are auto-discovered from the Application assembly (`AddValidatorsFromAssembly`), so a new `*CommandValidator` is wired up just by existing — no manual registration. On failure it throws `ValidationException`, caught by `GlobalExceptionMiddleware`.
+
+The middleware pipeline is ordered `CorrelationIdMiddleware` (outermost, stamps/propagates a correlation id per request) → `GlobalExceptionMiddleware` (maps domain exceptions — `ValidationException`, `NotFoundException`, `AuthenticationException` — to HTTP responses).
 
 **Adding a feature:** create the folder under `Application/Features/<Area>/{Commands|Queries}/<Name>/`, add the request + handler (+ validator if needed), then a controller action that dispatches it via `IMessageBus`. No DI registration needed for handlers/validators (assembly-scanned).
 
@@ -59,11 +62,13 @@ Validation runs automatically: `ValidationBehavior<,>` is a MediatR pipeline beh
 ### Real-time
 SignalR `NotificationHub` mapped at `/notifications`; backend pushes via typed `INotificationService` (`SignalRNotificationService`). Angular `SignalrService` subscribes with auto-reconnect and exposes an RxJS `Observable`.
 
-### Persistence
-MongoDB via a custom generic `IDatabaseContext` (CRUD, offset + cursor pagination, ACID transactions with `IClientSessionHandle`, connection-pool tuning). The `Email` value object is stored via a custom `EmailSerializer`. Repositories and the DB context are registered as **singletons**.
+### Persistence & caching
+MongoDB via a custom generic `IDatabaseContext` (CRUD, offset + cursor pagination, ACID transactions with `IClientSessionHandle`, connection-pool tuning). The `Email` value object is stored via a custom `EmailSerializer` (registered in `ConfigurationSettingExtensions`). Repositories and the DB context are registered as **singletons**. A Redis distributed cache backs a **cache-aside** pattern on read-heavy paths (e.g. blog reads) — see `BlogCacheAsideTests` for the expected behavior.
 
 ### Frontend
 Angular standalone components (`inject()` API, `@if`/`@for` control flow). State via NgRx (actions/reducers/effects/selectors) for subject/course data. Lazy-loaded feature routes (`Auth`, `Blog`, `Courses`, `dashboard`) under multiple layouts (`MainLayout`, `CourseLayout`). Config (API base URL etc.) comes from `ConfigService` + `environments/`.
 
 ## Configuration
-API config is bound via the Options pattern (`IOptions<T>`) from `appsettings.json` sections: `McpServer`, `GeminiOptions`, `ClaudeOptions`, `BrevoEmail`, `Auth:PasswordReset`, plus Mongo settings. Provide LLM API keys and the MongoDB connection string before running. CORS allows `http://localhost:4200` and the deployed Render frontend.
+API config is bound via the Options pattern (`IOptions<T>`) from `appsettings.json` sections: `McpServer`, `GeminiOptions`, `ClaudeOptions`, `BrevoEmail`, `Auth:PasswordReset`, plus Mongo and Redis connection settings. Provide LLM API keys, the MongoDB connection string, and the Redis connection before running. CORS allows `http://localhost:4200` and the deployed Render frontend.
+
+**Redis connection per environment:** the base `appsettings.json` leaves `ConnectionStrings:Redis` empty (empty → falls back to in-memory `IDistributedCache`, so the app still boots). Local dev sets `localhost:6379` in `appsettings.Development.json`. **Production** never commits a connection string — set the `ConnectionStrings__Redis` environment variable on the host (ASP.NET maps `__` to `ConnectionStrings:Redis` and it overrides the empty base value).
