@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Security;
 using Application.Features.Auth.DTOs;
 using Domain.Entities;
@@ -66,7 +66,6 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
             throw new UnknownException("Failed to register user.");
 
         _logger.LogInformation("User registered successfully with {UserId}", user.Id);
-
         return AuthResponseDto.FromUser(user);
     }
 }
