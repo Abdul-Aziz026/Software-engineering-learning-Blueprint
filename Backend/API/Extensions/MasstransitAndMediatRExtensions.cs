@@ -1,5 +1,5 @@
 ﻿using Application.Common.Behaviors;
-using Application.Features.Courses.Query.GetAllCourses;
+using Application.Features.Auth.Commands.Signup;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -10,7 +10,7 @@ public static class MasstransitAndMediatRExtensions
 {
     public static IServiceCollection AddMediatRAndMasstransit(this IServiceCollection services)
     {
-        var applicationAssembly = typeof(GetAllCoursesQueryHandler).Assembly;
+        var applicationAssembly = typeof(SignupCommandHandler).Assembly;
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(applicationAssembly);
