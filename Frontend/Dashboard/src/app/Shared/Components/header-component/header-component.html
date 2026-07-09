@@ -2,47 +2,21 @@
   <!-- Logo -->
   <div class="logo">
     <a class="tech-link logo-link" routerLink="">
-      <span>⚙️</span>
-    </a>
-    <a class="tech-link logo-link" routerLink="/course">
-      <span>DevTutorials</span>
+      <span>📮 Dispatch</span>
     </a>
   </div>
 
-  <!-- Tech Nav with arrows -->
-  <div class="tech-nav-wrapper">
-    <button type="button"
-            class="nav-arrow"
-            (click)="scrollPrev()"
-            [disabled]="!canScrollLeft"
-            aria-label="Previous subjects">‹</button>
-
-    <nav #navScroll class="tech-nav" (scroll)="onScroll()">
-      @if (subjects$ | async; as subjects) {
-        @for (subject of subjects; track subject.id) {
-          <a class="tech-link" [routerLink]="['/course', subject.id]">
-            {{ subject.name }}
-          </a>
-        }
-      }
-    </nav>
-
-    <button type="button"
-            class="nav-arrow"
-            (click)="scrollNext()"
-            [disabled]="!canScrollRight"
-            aria-label="Next subjects">›</button>
-
-    <!-- Fixed links: always visible, never scroll away with the subjects. -->
-    <div class="fixed-links">
-      <a class="tech-link" routerLink="/blog">
-        <span>Blog</span>
-      </a>
-      <a class="tech-link" routerLink="/course/lesson/create">
-        <span>Share Knowledge</span>
-      </a>
-    </div>
-  </div>
+  <!-- Primary nav -->
+  <nav class="main-nav">
+    <a class="tech-link" routerLink="/posts">Posts</a>
+    @if (authService.currentUser()) {
+      <a class="tech-link" routerLink="/posts/create">Write</a>
+    }
+    @if (authService.isAdmin()) {
+      <a class="tech-link" routerLink="/admin">Admin</a>
+    }
+    <a class="tech-link" routerLink="/" fragment="subscribe">Subscribe</a>
+  </nav>
 
   <!-- Auth area -->
   <div class="auth-buttons">

@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './Layouts/main-layout-component/main-layout-component';
-import { CourseLayoutComponent } from './Layouts/course-layout-component/course-layout-component'; 
 
 export const routes: Routes = [
   {
@@ -10,22 +9,24 @@ export const routes: Routes = [
         .then(m => m.ResetPasswordComponent)
   },
   {
+    path: 'confirm-subscription',
+    loadComponent: () =>
+      import('./Features/Subscribers/Pages/confirm-subscription/confirm-subscription.component')
+        .then(m => m.ConfirmSubscriptionComponent)
+  },
+  {
+    path: 'unsubscribe',
+    loadComponent: () =>
+      import('./Features/Subscribers/Pages/unsubscribe/unsubscribe.component')
+        .then(m => m.UnsubscribeComponent)
+  },
+  {
     path: '',
     component: MainLayoutComponent,
     children: [
       {
         path: '',
         loadChildren: () => import('./Features/dashboard/dashboard.routes').then(o => o.DashboardRoutes)
-      }
-    ]
-  },
-  {
-    path: 'course',
-    component: CourseLayoutComponent,
-    children: [
-      {
-        path: '',
-        loadChildren: () => import('./Features/Courses/courses.routes').then(o => o.CourseRoutes)
       }
     ]
   }

@@ -2,27 +2,26 @@
   <div class="footer-container">
 
     <div class="footer-brand">
-      <h3>DevTutorials</h3>
-      <p>Learn and grow with real-world projects.</p>
+      <h3>📮 Dispatch</h3>
+      <p>Stories and updates, delivered to your inbox.</p>
     </div>
 
     <div class="footer-links">
-      <h4>Quick Links</h4>
-      <a routerLink="/about">About</a>
-      <a routerLink="/courses">Courses</a>
-      <a routerLink="/contact">Contact</a>
+      <h4>Explore</h4>
+      <a routerLink="/posts">Posts</a>
+      <a routerLink="/" fragment="subscribe">Subscribe</a>
     </div>
 
-    <div class="footer-info">
-      <h4>Resources</h4>
-      <a href="#">Documentation</a>
-      <a href="#">GitHub</a>
-      <a href="#">Community</a>
+    <div class="footer-subscribe">
+      <app-subscribe-form
+        heading="Join the newsletter"
+        description="No spam. Unsubscribe anytime.">
+      </app-subscribe-form>
     </div>
 
   </div>
 
   <div class="footer-bottom">
-    © 2026 DevTutorials · All Rights Reserved
+    © {{ year }} Dispatch · All Rights Reserved
   </div>
 </footer>
