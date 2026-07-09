@@ -58,11 +58,11 @@ public static class ServiceCollectionExtensions
 
         // Repositories
         services.AddSingleton<IRepository, Repository>();
-        services.AddSingleton<ICourseRepository, CourseRepository>();
         services.AddSingleton<IUserRepository, UserRepository>();
-        services.AddSingleton<IBlogPostRepository, BlogPostRepository>();
-        services.AddSingleton<IBlogCommentRepository, BlogCommentRepository>();
-        services.AddSingleton<IBlogLikeRepository, BlogLikeRepository>();
+        services.AddSingleton<IPostRepository, PostRepository>();
+        services.AddSingleton<IPostCommentRepository, PostCommentRepository>();
+        services.AddSingleton<IPostLikeRepository, PostLikeRepository>();
+        services.AddSingleton<ISubscriberRepository, SubscriberRepository>();
 
         services.AddScoped<IMessageBus, MessageBus>();
 
