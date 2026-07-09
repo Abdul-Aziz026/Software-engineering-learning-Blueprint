@@ -197,3 +197,19 @@
 .btn-primary { background: var(--primary-gradient); color: #fff; }
 .btn-secondary { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-primary); }
 .btn-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; }
+
+.status-badge {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+
+  &.rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
