@@ -2,17 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { marked } from 'marked';
-import { BlogService } from '../../Services/blog.service';
+import { PostService } from '../../Services/post.service';
 import { AuthService } from '../../../Auth/Services/auth.service';
 
 @Component({
-  selector: 'app-blog-form',
+  selector: 'app-post-form',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './blog-form.html',
-  styleUrl: './blog-form.scss'
+  templateUrl: './post-form.html',
+  styleUrl: './post-form.scss'
 })
-export class BlogFormComponent implements OnInit {
+export class PostFormComponent implements OnInit {
   isEditing = false;
   postId: string | null = null;
   errorMessage = '';
@@ -26,14 +26,14 @@ export class BlogFormComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private blogService: BlogService,
+    private postService: PostService,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     // Creating/editing requires authentication.
     if (!this.authService.currentUser()) {
-      this.router.navigate(['/blog']);
+      this.router.navigate(['/posts']);
       return;
     }
 
@@ -41,16 +41,16 @@ export class BlogFormComponent implements OnInit {
     if (id) {
       this.isEditing = true;
       this.postId = id;
-      this.blogService.getPost(id).subscribe({
+      this.postService.getPost(id).subscribe({
         next: (post) => {
           // Only the author may edit; otherwise bounce back to the post.
           if (post.authorId !== this.authService.currentUser()?.userId) {
-            this.router.navigate(['/blog', id]);
+            this.router.navigate(['/posts', id]);
             return;
           }
           this.form = { title: post.title, summary: post.summary, content: post.content };
         },
-        error: () => this.router.navigate(['/blog'])
+        error: () => this.router.navigate(['/posts'])
       });
     }
   }
@@ -73,13 +73,13 @@ export class BlogFormComponent implements OnInit {
 
     if (this.isEditing && this.postId) {
       const id = this.postId;
-      this.blogService.updatePost(id, payload).subscribe({
-        next: () => this.router.navigate(['/blog', id]),
+      this.postService.updatePost(id, payload).subscribe({
+        next: () => this.router.navigate(['/posts', id]),
         error: (err) => (this.errorMessage = err.error?.message ?? 'Failed to save post.')
       });
     } else {
-      this.blogService.createPost(payload).subscribe({
-        next: () => this.router.navigate(['/blog']),
+      this.postService.createPost(payload).subscribe({
+        next: () => this.router.navigate(['/posts']),
         error: (err) => (this.errorMessage = err.error?.message ?? 'Failed to create post.')
       });
     }
@@ -87,9 +87,9 @@ export class BlogFormComponent implements OnInit {
 
   cancel(): void {
     if (this.isEditing && this.postId) {
-      this.router.navigate(['/blog', this.postId]);
+      this.router.navigate(['/posts', this.postId]);
     } else {
-      this.router.navigate(['/blog']);
+      this.router.navigate(['/posts']);
     }
   }
 }

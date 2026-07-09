@@ -1,4 +1,6 @@
-export interface BlogPostSummary {
+export type PostStatus = 'Pending' | 'Published' | 'Rejected';
+
+export interface PostSummary {
   id: string;
   title: string;
   summary: string;
@@ -6,20 +8,22 @@ export interface BlogPostSummary {
   authorUsername: string;
   createdAt: string;
   updatedAt?: string | null;
+  publishedAt?: string | null;
+  status: PostStatus;
   likeCount: number;
   commentCount: number;
 }
 
-export interface BlogComment {
+export interface PostComment {
   id: string;
-  blogPostId: string;
+  postId: string;
   authorId: string;
   authorUsername: string;
   content: string;
   createdAt: string;
 }
 
-export interface BlogPostDetail {
+export interface PostDetail {
   id: string;
   title: string;
   content: string;
@@ -28,19 +32,21 @@ export interface BlogPostDetail {
   authorUsername: string;
   createdAt: string;
   updatedAt?: string | null;
+  publishedAt?: string | null;
+  status: PostStatus;
   likeCount: number;
   commentCount: number;
   likedByCurrentUser: boolean;
-  comments: BlogComment[];
+  comments: PostComment[];
 }
 
-export interface CreateBlogPostRequest {
+export interface CreatePostRequest {
   title: string;
   content: string;
   summary?: string;
 }
 
-export interface UpdateBlogPostRequest {
+export interface UpdatePostRequest {
   title: string;
   content: string;
   summary?: string;

@@ -1,25 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { BlogService } from '../../Services/blog.service';
-import { BlogPostSummary } from '../../Models/blog.model';
+import { PostService } from '../../Services/post.service';
+import { PostSummary } from '../../Models/post.model';
 import { AuthService } from '../../../Auth/Services/auth.service';
 import { AuthModalService } from '../../../Auth/Services/auth-modal.service';
-import { BlogCardComponent } from '../blog-card/blog-card';
+import { PostCardComponent } from '../post-card/post-card';
 
 @Component({
-  selector: 'app-blog-list',
+  selector: 'app-post-list',
   standalone: true,
-  imports: [BlogCardComponent],
-  templateUrl: './blog-list.html',
-  styleUrl: './blog-list.scss'
+  imports: [PostCardComponent],
+  templateUrl: './post-list.html',
+  styleUrl: './post-list.scss'
 })
-export class BlogListComponent implements OnInit {
-  posts: BlogPostSummary[] = [];
+export class PostListComponent implements OnInit {
+  posts: PostSummary[] = [];
   loading = false;
   error = '';
 
   constructor(
-    private blogService: BlogService,
+    private postService: PostService,
     private router: Router,
     public authService: AuthService,
     private authModal: AuthModalService
@@ -32,7 +32,7 @@ export class BlogListComponent implements OnInit {
   loadPosts(): void {
     this.loading = true;
     this.error = '';
-    this.blogService.getPosts().subscribe({
+    this.postService.getPosts().subscribe({
       next: (posts) => {
         this.posts = posts;
         this.loading = false;
@@ -45,7 +45,7 @@ export class BlogListComponent implements OnInit {
   }
 
   openPost(id: string): void {
-    this.router.navigate(['/blog', id]);
+    this.router.navigate(['/posts', id]);
   }
 
   startCreate(): void {
@@ -54,6 +54,6 @@ export class BlogListComponent implements OnInit {
       this.authModal.open('login');
       return;
     }
-    this.router.navigate(['/blog/create']);
+    this.router.navigate(['/posts/create']);
   }
 }
