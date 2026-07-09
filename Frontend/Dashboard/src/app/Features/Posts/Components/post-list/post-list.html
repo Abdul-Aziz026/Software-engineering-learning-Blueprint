@@ -1,0 +1,29 @@
+<div class="post-container">
+  <header class="post-header">
+    <div>
+      <h2>Latest posts</h2>
+      <p class="subtitle">Stories and updates from the community.</p>
+    </div>
+    <button class="btn btn-primary" (click)="startCreate()">Write a post</button>
+  </header>
+
+  @if (error) {
+    <div class="error-banner">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="empty-state"><p>Loading posts…</p></div>
+  }
+
+  <div class="post-grid">
+    @for (post of posts; track post.id) {
+      <app-post-card [post]="post" (open)="openPost($event)" />
+    }
+  </div>
+
+  @if (!posts.length && !loading) {
+    <div class="empty-state">
+      <p>No posts yet. Be the first to share your knowledge!</p>
+    </div>
+  }
+</div>

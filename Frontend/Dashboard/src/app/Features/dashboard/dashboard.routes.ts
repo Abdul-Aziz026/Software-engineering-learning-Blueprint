@@ -1,4 +1,5 @@
 import { Routes } from "@angular/router";
+import { adminGuard } from "../../Core/Guards/admin.guard";
 
 export const DashboardRoutes: Routes = [
     {
@@ -6,33 +7,29 @@ export const DashboardRoutes: Routes = [
         loadComponent: () => import("./components/dashboard-home/dashboard-home").then(o => o.DashboardHome)
     },
     {
-        path: 'course',
-        loadComponent: () => import('../Courses/Components/subjects-component/subjects-component').then(o => o.SubjectsComponent)
-    },
-    
-    {
-        path: 'course/lesson/create',
-        loadComponent: () => import('../Courses/Components/lesson-create-component/lesson-create-component').then(o => o.LessonCreateComponent)
-    },
-    {
         path: 'profile',
         loadComponent: () => import('../Auth/Components/profile/profile.component').then(o => o.ProfileComponent)
     },
-    // Blog feature. `create` is listed before `:id` so it isn't captured as a post id.
     {
-        path: 'blog',
-        loadComponent: () => import('../Blog/Components/blog-list/blog-list').then(o => o.BlogListComponent)
+        path: 'admin',
+        canActivate: [adminGuard],
+        loadComponent: () => import('../Admin/admin.component').then(o => o.AdminComponent)
+    },
+    // Posts feature. `create` is listed before `:id` so it isn't captured as a post id.
+    {
+        path: 'posts',
+        loadComponent: () => import('../Posts/Components/post-list/post-list').then(o => o.PostListComponent)
     },
     {
-        path: 'blog/create',
-        loadComponent: () => import('../Blog/Components/blog-form/blog-form').then(o => o.BlogFormComponent)
+        path: 'posts/create',
+        loadComponent: () => import('../Posts/Components/post-form/post-form').then(o => o.PostFormComponent)
     },
     {
-        path: 'blog/:id/edit',
-        loadComponent: () => import('../Blog/Components/blog-form/blog-form').then(o => o.BlogFormComponent)
+        path: 'posts/:id/edit',
+        loadComponent: () => import('../Posts/Components/post-form/post-form').then(o => o.PostFormComponent)
     },
     {
-        path: 'blog/:id',
-        loadComponent: () => import('../Blog/Components/blog-detail/blog-detail').then(o => o.BlogDetailComponent)
+        path: 'posts/:id',
+        loadComponent: () => import('../Posts/Components/post-detail/post-detail').then(o => o.PostDetailComponent)
     },
 ];

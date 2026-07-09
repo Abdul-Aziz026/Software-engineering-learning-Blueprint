@@ -1,7 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { loadSubjects } from './Core/Store/actions/subject.actions';
 import { SignalrService } from './Core/Services/signalr.service';
 
 @Component({
@@ -11,12 +9,9 @@ import { SignalrService } from './Core/Services/signalr.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
-  protected readonly title = signal('Dashboard');
+export class AppComponent {
+  protected readonly title = signal('Dispatch');
 
-  constructor(private signalrService: SignalrService, private store: Store) {}
-
-  ngOnInit(): void {
-    this.store.dispatch(loadSubjects());
-  }
+  // Injected so the SignalR connection is established for the app lifetime.
+  constructor(private signalrService: SignalrService) {}
 }

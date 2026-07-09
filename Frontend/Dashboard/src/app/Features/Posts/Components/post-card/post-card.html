@@ -1,0 +1,21 @@
+<article class="post-card"
+         role="link"
+         tabindex="0"
+         (click)="open.emit(post().id)"
+         (keydown.enter)="open.emit(post().id)">
+  <h3 class="card-title">{{ post().title }}</h3>
+  @if (post().status && post().status !== 'Published') {
+    <span class="status-badge" [class.rejected]="post().status === 'Rejected'">
+      {{ post().status === 'Rejected' ? 'Rejected' : 'Pending review' }}
+    </span>
+  }
+  <p class="card-summary">{{ post().summary }}</p>
+  <div class="card-meta">
+    <span class="author">✍️ {{ post().authorUsername }}</span>
+    <span class="date">{{ post().createdAt | date:'mediumDate' }}</span>
+  </div>
+  <div class="card-stats">
+    <span>❤️ {{ post().likeCount }}</span>
+    <span>💬 {{ post().commentCount }}</span>
+  </div>
+</article>
