@@ -6,7 +6,7 @@ namespace Domain.Common;
 /// Base class for aggregate roots - the ONLY entities that can raise domain events.
 /// This is the opt-in switch for event dispatch: the persistence boundary publishes
 /// events exclusively for aggregates that explicitly raised something, so ordinary
-/// entity writes (BlogLike, Chapter, ...) never trigger any publishing at all.
+/// entity writes (PostLike, PostComment, ...) never trigger any publishing at all.
 /// </summary>
 public abstract class AggregateRoot : BaseEntity
 {
