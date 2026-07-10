@@ -16,7 +16,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize] // All chat endpoints require an authenticated user.
-public class ChatController : ControllerBase
+public class ChatController : ApiControllerBase
 {
     private readonly IMessageBus _messageBus;
     private readonly IChatHistoryStore _historyStore;
@@ -27,9 +27,6 @@ public class ChatController : ControllerBase
         _messageBus = messageBus;
         _historyStore = chatHistoryStore;
     }
-
-    // The authenticated user's id from the JWT 'sub' claim.
-    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     // ── POST /api/chat ───────────────────────────────────────────────────────
     // Request:  { "query": "What is the weather in London?", "provider": "Gemini" }

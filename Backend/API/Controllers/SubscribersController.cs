@@ -12,7 +12,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SubscribersController : ControllerBase
+public class SubscribersController : ApiControllerBase
 {
     private readonly IMessageBus _messageBus;
 
@@ -20,8 +20,6 @@ public class SubscribersController : ControllerBase
     {
         _messageBus = messageBus;
     }
-
-    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     /// <summary>Subscribe by email (public). Sends a double opt-in confirmation link.</summary>
     [AllowAnonymous]

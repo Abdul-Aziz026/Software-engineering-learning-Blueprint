@@ -1,6 +1,5 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Security;
-using Application.Common.Security;
 using Application.Features.Auth.DTOs;
 using Application.Settings;
 using Domain.Enums;
@@ -13,21 +12,18 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, AuthResponseDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IJwtTokenGenerator _tokenGenerator;
-    private readonly JwtOptions _jwtOptions;
+    private readonly IAuthTokenIssuer _tokenIssuer;
     private readonly SuperAdminOptions _superAdmin;
 
     public LoginQueryHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
-        IJwtTokenGenerator tokenGenerator,
-        JwtOptions jwtOptions,
+        IAuthTokenIssuer tokenIssuer,
         SuperAdminOptions superAdmin)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
-        _tokenGenerator = tokenGenerator;
-        _jwtOptions = jwtOptions;
+        _tokenIssuer = tokenIssuer;
         _superAdmin = superAdmin;
     }
 
@@ -55,7 +51,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, AuthResponseDto>
         }
 
         // Mint tokens (stamps a fresh refresh-token hash) and persist that (+ any role change).
-        var response = AuthTokenIssuer.Issue(_tokenGenerator, _jwtOptions, user);
+        var response = _tokenIssuer.Issue(user);
         await _userRepository.UpdateAsync(user);
 
         return response;

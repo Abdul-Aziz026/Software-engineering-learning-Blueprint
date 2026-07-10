@@ -44,7 +44,10 @@ public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand>
 
         await _blogPostRepository.DeleteByIdAsync<Post>(post.Id);
 
-        // The post is gone — drop its cached snapshot so a miss returns NotFound, not stale data.
+        // The post is gone — drop its cached snapshots so a miss returns NotFound, not stale data.
+        // The AI summary matters most: its 24h TTL would keep serving a summary of a deleted
+        // post long after the 60s detail snapshot had already expired on its own.
         await _cache.RemoveAsync(PostCacheKeys.Detail(post.Id), cancellationToken);
+        await _cache.RemoveAsync(PostCacheKeys.AiSummary(post.Id), cancellationToken);
     }
 }

@@ -20,7 +20,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize] // Writes/authored/admin actions require a token; public reads opt out with [AllowAnonymous].
-public class PostsController : ControllerBase
+public class PostsController : ApiControllerBase
 {
     private readonly IMessageBus _messageBus;
 
@@ -28,9 +28,6 @@ public class PostsController : ControllerBase
     {
         _messageBus = messageBus;
     }
-
-    // The authenticated user's id from the JWT 'sub' claim (null on anonymous requests).
-    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     // ── GET /api/posts?page=&pageSize= — public feed ──────────────────────────
     [AllowAnonymous]

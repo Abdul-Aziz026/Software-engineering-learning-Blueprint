@@ -33,12 +33,17 @@ public class User : AggregateRoot
     public static User Register(string username, Email email, string passwordHash, string passwordSalt)
     {
         if (string.IsNullOrWhiteSpace(username))
+        {
             throw new ValidationException("Username is required.");
+        }
         if (email is null)
+        {
             throw new ValidationException("Email is required.");
+        }
         if (string.IsNullOrWhiteSpace(passwordHash) || string.IsNullOrWhiteSpace(passwordSalt))
+        {
             throw new ValidationException("Password credentials are required.");
-
+        }
         var user = new User
         {
             Username = username.Trim().ToLowerInvariant(),

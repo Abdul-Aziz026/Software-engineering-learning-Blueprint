@@ -1,6 +1,5 @@
 ﻿using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Security;
-using Application.Common.Security;
 using Application.Features.Auth.DTOs;
 using Application.Settings;
 using Domain.Entities;
@@ -17,8 +16,7 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IAuthValidator _authValidator;
-    private readonly IJwtTokenGenerator _tokenGenerator;
-    private readonly JwtOptions _jwtOptions;
+    private readonly IAuthTokenIssuer _tokenIssuer;
     private readonly SuperAdminOptions _superAdmin;
     private readonly ILogger<SignupCommandHandler> _logger;
 
@@ -26,16 +24,14 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IAuthValidator authValidator,
-        IJwtTokenGenerator tokenGenerator,
-        JwtOptions jwtOptions,
+        IAuthTokenIssuer tokenIssuer,
         SuperAdminOptions superAdmin,
         ILogger<SignupCommandHandler> logger)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _authValidator = authValidator;
-        _tokenGenerator = tokenGenerator;
-        _jwtOptions = jwtOptions;
+        _tokenIssuer = tokenIssuer;
         _superAdmin = superAdmin;
         _logger = logger;
     }
@@ -78,7 +74,7 @@ public class SignupCommandHandler : IRequestHandler<SignupCommand, AuthResponseD
             user.AssignRole(UserRole.SuperAdmin);
 
         // Mint tokens (stamps the refresh-token hash on the user) before the single persist.
-        var response = AuthTokenIssuer.Issue(_tokenGenerator, _jwtOptions, user);
+        var response = _tokenIssuer.Issue(user);
 
         var added = await _userRepository.AddAsync(user);
         if (!added)

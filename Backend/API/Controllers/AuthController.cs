@@ -18,7 +18,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize] // Protected by default; anonymous endpoints opt out with [AllowAnonymous].
-public class AuthController : ControllerBase
+public class AuthController : ApiControllerBase
 {
     private readonly IMessageBus _messageBus;
 
@@ -27,9 +27,6 @@ public class AuthController : ControllerBase
         _messageBus = messageBus;
     }
 
-    // The authenticated user's id, from the JWT 'sub' claim (mapped to NameIdentifier).
-    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
-
     /// <summary>Register a new user. Returns an access token + refresh token.</summary>
     [AllowAnonymous]
     [HttpPost("signup")]
@@ -37,7 +34,8 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponseDto>> Signup([FromBody] SignupRequestDto request)
     {
-        var response = await _messageBus.SendAsync<SignupCommand, AuthResponseDto>(request.ToSignupCommand());
+        var signupCommand = request.ToSignupCommand();
+        var response = await _messageBus.SendAsync<SignupCommand, AuthResponseDto>(signupCommand);
         return Created(string.Empty, response);
     }
 
@@ -48,7 +46,8 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
     {
-        var response = await _messageBus.SendAsync<LoginQuery, AuthResponseDto>(request.ToLoginQuery());
+        var loginQuery = request.ToLoginQuery();
+      var response = await _messageBus.SendAsync<LoginQuery, AuthResponseDto>(loginQuery);
         return Ok(response);
     }
 
@@ -59,7 +58,8 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponseDto>> Refresh([FromBody] RefreshTokenRequestDto request)
     {
-        var response = await _messageBus.SendAsync<RefreshTokenCommand, AuthResponseDto>(request.ToRefreshTokenCommand());
+        var refreshTokenCommand = request.ToRefreshTokenCommand();
+        var response = await _messageBus.SendAsync<RefreshTokenCommand, AuthResponseDto>(refreshTokenCommand);
         return Ok(response);
     }
 
@@ -69,8 +69,9 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         var userId = GetUserId();
+        var logoutCommand = new LogoutCommand() { UserId = userId! };
         if (userId is not null)
-            await _messageBus.SendAsync(new LogoutCommand { UserId = userId });
+            await _messageBus.SendAsync(logoutCommand);
         return NoContent();
     }
 
@@ -80,7 +81,8 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<MessageResponseDto>> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
     {
-        var response = await _messageBus.SendAsync<ForgotPasswordCommand, MessageResponseDto>(request.ToForgotPasswordCommand());
+        var forgotPasswordCommand = request.ToForgotPasswordCommand();
+        var response = await _messageBus.SendAsync<ForgotPasswordCommand, MessageResponseDto>(forgotPasswordCommand);
         return Ok(response);
     }
 
