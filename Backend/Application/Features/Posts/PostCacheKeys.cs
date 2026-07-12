@@ -11,4 +11,7 @@ public static class PostCacheKeys
 {
     /// <summary>Key for a single post's cached detail snapshot (user-independent).</summary>
     public static string Detail(string postId) => $"post:detail:{postId}";
+
+    /// <summary>Key for a post's cached AI summary (longer, ~24h TTL — see GetPostAiSummary).</summary>
+    public static string AiSummary(string postId) => $"post:aisummary:{postId}";
 }
