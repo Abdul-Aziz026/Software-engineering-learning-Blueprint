@@ -6,8 +6,4 @@ export class ConfigService {
   get baseUrl(): string {
     return environment.baseUrl;
   }
-
-  get isProduction(): boolean {
-    return environment.production;
-  }
 }
