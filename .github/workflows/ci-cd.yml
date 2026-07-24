@@ -1,0 +1,114 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '22'
+  DOCKERHUB_NAMESPACE: abdulaziz026
+
+jobs:
+  # ---------- BUILD + TEST (backend) ----------
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('Backend/**/*.csproj') }}
+
+      - name: Restore
+        run: dotnet restore Backend/BackendBluePrint.slnx
+
+      - name: Build
+        run: dotnet build Backend/BackendBluePrint.slnx --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Backend/BackendBluePrint.slnx --no-build --configuration Release --logger trx
+
+  # ---------- BUILD + TEST (frontend) ----------
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Frontend/Dashboard
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: Frontend/Dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # ---------- PACKAGE (Docker images -> Docker Hub) ----------
+  package:
+    needs: [ backend, frontend ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Backend
+          file: ./Backend/API/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_NAMESPACE }}/backend:latest
+            ${{ env.DOCKERHUB_NAMESPACE }}/backend:${{ github.sha }}
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Frontend/Dashboard
+          file: ./Frontend/Dashboard/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_NAMESPACE }}/frontend:latest
+            ${{ env.DOCKERHUB_NAMESPACE }}/frontend:${{ github.sha }}
+
+  # ---------- DEPLOY (tell Render to pull the new images) ----------
+  deploy:
+    needs: package
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Trigger Render deploy - backend
+        run: curl -f "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+
+      - name: Trigger Render deploy - frontend
+        run: curl -f "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
