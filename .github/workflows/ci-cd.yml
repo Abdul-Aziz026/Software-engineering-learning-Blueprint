@@ -99,7 +99,12 @@ jobs:
         run: npm ci
 
       - name: Test
-        run: npm test
+        run: |
+          if find src -name '*.spec.ts' -o -name '*.test.ts' | grep -q .; then
+            npm test
+          else
+            echo "No frontend tests yet — skipping (runner stays wired for when tests are added)."
+          fi
 
       - name: Build
         run: npm run build
