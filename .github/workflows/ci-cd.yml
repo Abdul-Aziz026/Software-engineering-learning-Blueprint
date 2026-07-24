@@ -12,6 +12,8 @@ env:
   DOCKERHUB_NAMESPACE: abdulaziz026
 
 jobs:
+  # ================= BACKEND LANE =================
+
   # ---------- BUILD + TEST (backend) ----------
   backend:
     runs-on: ubuntu-latest
@@ -39,6 +41,43 @@ jobs:
       - name: Test
         run: dotnet test Backend/BackendBluePrint.slnx --no-build --configuration Release --logger trx
 
+  # ---------- PACKAGE (backend image -> Docker Hub) ----------
+  backend-package:
+    needs: backend
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Backend
+          file: ./Backend/API/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_NAMESPACE }}/backend:latest
+            ${{ env.DOCKERHUB_NAMESPACE }}/backend:${{ github.sha }}
+
+  # ---------- DEPLOY (backend -> Render) ----------
+  backend-deploy:
+    needs: backend-package
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Trigger Render deploy - backend
+        run: curl -f "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+
+  # ================= FRONTEND LANE =================
+
   # ---------- BUILD + TEST (frontend) ----------
   frontend:
     runs-on: ubuntu-latest
@@ -65,9 +104,9 @@ jobs:
       - name: Build
         run: npm run build
 
-  # ---------- PACKAGE (Docker images -> Docker Hub) ----------
-  package:
-    needs: [ backend, frontend ]
+  # ---------- PACKAGE (frontend image -> Docker Hub) ----------
+  frontend-package:
+    needs: frontend
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -80,16 +119,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./Backend
-          file: ./Backend/API/Dockerfile
-          push: true
-          tags: |
-            ${{ env.DOCKERHUB_NAMESPACE }}/backend:latest
-            ${{ env.DOCKERHUB_NAMESPACE }}/backend:${{ github.sha }}
-
       - name: Build & push frontend image
         uses: docker/build-push-action@v6
         with:
@@ -100,15 +129,12 @@ jobs:
             ${{ env.DOCKERHUB_NAMESPACE }}/frontend:latest
             ${{ env.DOCKERHUB_NAMESPACE }}/frontend:${{ github.sha }}
 
-  # ---------- DEPLOY (tell Render to pull the new images) ----------
-  deploy:
-    needs: package
+  # ---------- DEPLOY (frontend -> Render) ----------
+  frontend-deploy:
+    needs: frontend-package
     runs-on: ubuntu-latest
     environment:
       name: production
     steps:
-      - name: Trigger Render deploy - backend
-        run: curl -f "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
-
       - name: Trigger Render deploy - frontend
         run: curl -f "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
