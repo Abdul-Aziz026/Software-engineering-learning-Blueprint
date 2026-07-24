@@ -23,6 +23,12 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLife
 {
     private readonly MongoDbContainer _mongo = new MongoDbBuilder("mongo:7.0").Build();
 
+    public IntegrationTestFactory()
+    {
+        // Jwt:Key is validated before builder.Build() (so ConfigureAppConfiguration is too late) — set it as an env var, which is read earlier at CreateBuilder time.
+        Environment.SetEnvironmentVariable("Jwt__Key", "integration-test-signing-key-0123456789-abcdef");
+    }
+
     public async Task InitializeAsync() => await _mongo.StartAsync();
 
     // Explicit interface impl so it doesn't clash with the base WebApplicationFactory.DisposeAsync
