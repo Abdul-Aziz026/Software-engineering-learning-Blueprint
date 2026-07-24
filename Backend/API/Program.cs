@@ -67,6 +67,7 @@ builder.Services.AddMcpServer()
 // Singleton MCP client; connects lazily on first use and is disposed (IAsyncDisposable) on host shutdown.
 builder.Services.AddSingleton<IMcpService, McpService>();
 builder.Services.AddSingleton<ILlmFactory, LlmFactory>();
+builder.Services.AddSingleton<IEmbeddingGeneratorFactory, EmbeddingGeneratorFactory>();
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<INotificationService, SignalRNotificationService>();

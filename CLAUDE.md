@@ -6,73 +6,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-A full-stack, AI-powered learning platform. Backend is ASP.NET Core (.NET 10) in strict Clean Architecture; frontend is an Angular SPA (`Frontend/Dashboard`). Core differentiator is an in-process MCP server + client that drives an agentic LLM loop (Gemini or Claude, switchable at runtime).
+A full-stack, AI-powered learning platform:
+
+- **Backend** — ASP.NET Core (.NET 10), strict Clean Architecture.
+- **Frontend** — Angular SPA (`Frontend/Dashboard`).
+- **Differentiator** — an in-process MCP server + client driving an agentic LLM loop, with the provider (Gemini or Claude) switchable at runtime.
 
 ## Commands
 
-### Backend (run from `Backend/`)
+### Backend (from `Backend/`)
 ```bash
-dotnet build BackendBluePrint.slnx          # build whole solution
-dotnet run --project API                    # run the Web API (Swagger at /swagger in Development)
-dotnet test                                 # run all xUnit tests
-dotnet test --filter "FullyQualifiedName~EmailTests"          # run one test class
-dotnet test --filter "FullyQualifiedName~SignupCommandValidatorTests.Validate_Fails_When_Email_Invalid"  # run one test
+dotnet build BackendBluePrint.slnx     # build the solution
+dotnet run --project API               # run the API (Swagger at /swagger in Development)
+dotnet test                            # all xUnit tests
+dotnet test --filter "FullyQualifiedName~EmailTests"                       # one class
+dotnet test --filter "FullyQualifiedName~SignupCommandValidatorTests.Validate_Fails_When_Email_Invalid"   # one test
+dotnet test --filter "FullyQualifiedName~Integration"                      # integration tests only
 ```
-Tests live in `Backend/Tests/` (xUnit). **Unit** tests reference only `Domain` and `Application` — keep them off Infrastructure/API. **Exception:** integration tests under `Backend/Tests/Integration/` legitimately reference `API` (and transitively Infrastructure) to boot the real host via `WebApplicationFactory<Program>`, and require Docker (Testcontainers spins up a throwaway MongoDB). Run integration tests with `dotnet test --filter "FullyQualifiedName~Integration"`.
 
-### Frontend (run from `Frontend/Dashboard/`)
+**Test layering:** tests live in `Backend/Tests/` (xUnit). Unit tests reference only `Domain` and `Application` — keep them off `Infrastructure`/`API`. Integration tests under `Backend/Tests/Integration/` are the exception: they reference `API` to boot the real host via `WebApplicationFactory<Program>` and require Docker (Testcontainers spins up a throwaway MongoDB).
+
+### Frontend (from `Frontend/Dashboard/`)
 ```bash
 npm install
-npm start            # ng serve — dev server on http://localhost:4200
-npm run build        # production build
-npm test             # vitest unit tests
+npm start        # ng serve → http://localhost:4200
+npm run build    # production build
+npm test         # vitest unit tests
 ```
 
 ### Full stack
 ```bash
-docker compose up --build    # frontend → localhost:4200, backend → localhost:5000
+docker compose up --build    # frontend → :4200, backend → :5000
 ```
 
 ## Architecture
 
-### Backend layering (dependency flow is inward only)
-`API` → `Infrastructure` → `Application` → `Domain`. `Domain` has **zero** external/framework dependencies. Never make `Application` or `Domain` depend on `Infrastructure` or `API`. Cross-layer references are always against an interface, never a concrete class. All six projects target **`net10.0`**.
+### Backend layering (dependencies flow inward only)
 
-- **Domain** — entities (`BaseEntity`, `User`, `BlogPost`, `Chapter`, `Subject`, `ChatThread`…), enums (`LlmProvider`, `NotificationType`), value objects (`Email`), exceptions, repository interfaces. References nothing.
-- **Application** — CQRS feature slices under `Features/<Area>/{Commands,Queries}/<Name>/`, each with a `*Command`/`*Query`, its `*Handler`, and optional `*Validator`. Also holds DTOs, interface definitions (`Common/Interfaces/...`), and MCP tool authoring (`Tools/TutorialTools.cs`). References `Domain` + `Contracts`.
-- **Contracts** — shared message contracts (for MassTransit). References nothing but MediatR; referenced by `Application` and `API`. It is *not* a layer in the inward-dependency rule — treat it as a leaf shared kernel.
-- **Infrastructure** — concrete implementations: MongoDB (`Persistence/DatabaseContext.cs`, `Repositories/`), Redis distributed cache, SignalR hub + notification service, LLM clients + `LlmFactory`, MCP service, MassTransit `MessageBus`, email (`BrevoEmailSender`), password hashing. References `Application` + `Domain`.
-- **API** — thin controllers, middleware, `Program.cs` DI wiring. Service registration is split across `Extensions/ServiceCollectionExtensions.cs` (repos/cache/security/message bus), `Extensions/MasstransitAndMediatRExtensions.cs` (MediatR + validators + `ValidationBehavior`), and `Extensions/ConfigurationSettingExtensions.cs` (options binding + BSON serializer registration). References `Application`, `Infrastructure`, `Contracts`.
+`API` → `Infrastructure` → `Application` → `Domain`. All six projects target `net10.0`. Rules:
+
+- `Domain` has **zero** external/framework dependencies.
+- Never make `Application` or `Domain` depend on `Infrastructure` or `API`.
+- Cross-layer references are always against an interface, never a concrete class.
+
+| Project | Role | References |
+|---|---|---|
+| **Domain** | Entities (`BaseEntity`, `User`, `BlogPost`, `Chapter`, `Subject`, `ChatThread`…), enums (`LlmProvider`, `NotificationType`), value objects (`Email`), exceptions, repository interfaces. | nothing |
+| **Application** | CQRS feature slices, DTOs, interface definitions (`Common/Interfaces/…`), MCP tool authoring (`Tools/TutorialTools.cs`). | Domain, Contracts |
+| **Contracts** | Shared MassTransit message contracts. A leaf shared kernel, *not* a layer in the inward rule. | MediatR only |
+| **Infrastructure** | Concrete implementations: MongoDB (`Persistence/`, `Repositories/`), Redis cache, SignalR, LLM clients + `LlmFactory`, MCP service, MassTransit `MessageBus`, email, password hashing. | Application, Domain |
+| **API** | Thin controllers, middleware, DI wiring (`Program.cs`). | Application, Infrastructure, Contracts |
+
+API service registration is split across `Extensions/`: `ServiceCollectionExtensions.cs` (repos/cache/security/message bus), `MasstransitAndMediatRExtensions.cs` (MediatR + validators + `ValidationBehavior`), `ConfigurationSettingExtensions.cs` (options binding + BSON serializers).
 
 ### Request flow (CQRS)
-Controllers do **not** call MediatR directly. They inject `IMessageBus` (Infrastructure's `MessageBus`, which wraps MediatR) and call `SendAsync<TCommand, TResponse>(command)`. Every write is a `Command`, every read is a `Query`, each with a dedicated handler. Keep controllers thin — no business logic.
 
-Validation runs automatically: `ValidationBehavior<,>` is a MediatR pipeline behavior that executes every registered FluentValidation `AbstractValidator` before the handler. Validators are auto-discovered from the Application assembly (`AddValidatorsFromAssembly`), so a new `*CommandValidator` is wired up just by existing — no manual registration. On failure it throws `ValidationException`, caught by `GlobalExceptionMiddleware`.
+Controllers are thin — no business logic. They inject `IMessageBus` (Infrastructure's `MessageBus`, wrapping MediatR) and call `SendAsync<TCommand, TResponse>(command)`. Every write is a `Command`, every read a `Query`, each with a dedicated handler.
 
-The middleware pipeline is ordered `CorrelationIdMiddleware` (outermost, stamps/propagates a correlation id per request) → `GlobalExceptionMiddleware` (maps domain exceptions — `ValidationException`, `NotFoundException`, `AuthenticationException`, `LlmUnavailableException` → 502 — to HTTP responses). Error responses follow **RFC 7807** (`ProblemDetails`/`ValidationProblemDetails`) with the correlation id attached as a `correlationId` extension; the Angular chat UI consumes this contract, so keep new error paths on it.
+- **Validation** runs automatically via `ValidationBehavior<,>`, a MediatR pipeline behavior. FluentValidation validators are auto-discovered from the Application assembly (`AddValidatorsFromAssembly`) — a new `*CommandValidator` is wired up just by existing. On failure it throws `ValidationException`.
+- **Middleware order:** `CorrelationIdMiddleware` (outermost — stamps/propagates a correlation id) → `GlobalExceptionMiddleware` (maps domain exceptions to HTTP: `ValidationException`, `NotFoundException`, `AuthenticationException`, `LlmUnavailableException` → 502).
+- **Errors** follow RFC 7807 (`ProblemDetails`/`ValidationProblemDetails`) with the correlation id as a `correlationId` extension. The Angular chat UI depends on this contract — keep new error paths on it.
 
-**Adding a feature:** create the folder under `Application/Features/<Area>/{Commands|Queries}/<Name>/`, add the request + handler (+ validator if needed), then a controller action that dispatches it via `IMessageBus`. No DI registration needed for handlers/validators (assembly-scanned).
+**Adding a feature:** create `Application/Features/<Area>/{Commands|Queries}/<Name>/`, add the request + handler (+ validator if needed), then a controller action that dispatches via `IMessageBus`. Handlers and validators are assembly-scanned — no DI registration.
 
 ### AI / agentic subsystem
-- `ILlmFactory` (strategy pattern) returns the right `IChatClient` (`GeminiChatClient` or `ClaudeChatClient`) based on the `LlmProvider` enum passed at request time — consuming code never changes.
-- Provider clients are wrapped by `ResilientChatClient` (`Infrastructure/Llm/`): per-attempt timeout + bounded retry with exponential backoff/jitter for transient failures (network, 429, 5xx). It sits **inside** `FunctionInvokingChatClient`, so a single provider round-trip is retried — never the whole tool-calling loop (which would re-execute tools). Provider errors that exhaust retries surface as `LlmUnavailableException` (→ 502 via the middleware).
-- The app hosts an **in-process MCP server** (`AddMcpServer().WithToolsFromAssembly(...)`, mapped at `/mcp`) and connects to it from the **same process** via an MCP client. `McpStartupService` (an `IHostedService`) boots the client after Kestrel is listening.
-- MCP tools are `[McpServerTool]`-decorated methods in `Application/Tools/TutorialTools.cs`. The chat handler runs the full agentic loop: user message → LLM → tool-call decision → MCP tool execution → result injection → final response.
-- Chat identity flows via the `X-User-Id` HTTP header (set by the Angular `user-id.interceptor`), not a token. Chat history is persisted through `IChatHistoryStore` (`MongoChatHistoryStore`).
-- **Prompt-injection trust boundary** (`Application/Common/Ai/LlmContentGuard.cs`): `WrapUntrustedContent` fences untrusted text (tool results, user text fed into one-shot LLM features) so a forged fence marker inside it can't escape into instruction space; `SanitizeDisplayText` allow-lists model *output* before it reaches a UI/log/DB. In `SendChatCommandHandler`, every MCP tool result is wrapped before being sent back to the model, and a `ToolResultTrustBoundary` system message is prepended to the transient call list (never to `threadMessages`, so it's never persisted/duplicated).
+
+- **Provider strategy** — `ILlmFactory` returns the right `IChatClient` (`GeminiChatClient` or `ClaudeChatClient`) for the `LlmProvider` passed at request time; consuming code never changes.
+- **Resilience** — provider clients are wrapped by `ResilientChatClient` (`Infrastructure/Llm/`): per-attempt timeout + bounded retry (exponential backoff/jitter) for transient failures (network, 429, 5xx). It sits **inside** `FunctionInvokingChatClient`, so a single provider round-trip is retried — never the whole tool-calling loop (which would re-execute tools). Exhausted retries surface as `LlmUnavailableException` (→ 502).
+- **In-process MCP** — the app hosts an MCP server (`AddMcpServer().WithToolsFromAssembly(...)`, mapped at `/mcp`) and connects to it from the same process via an MCP client. `McpStartupService` (`IHostedService`) boots the client after Kestrel is listening. Tools are `[McpServerTool]` methods in `Application/Tools/TutorialTools.cs`.
+- **Agentic loop** (in the chat handler): user message → LLM → tool-call decision → MCP tool execution → result injection → final response.
+- **Chat identity** flows via the `X-User-Id` header (set by the Angular `user-id.interceptor`), not a token. History is persisted through `IChatHistoryStore` (`MongoChatHistoryStore`).
+- **Embeddings** — a parallel seam to chat: `IEmbeddingGeneratorFactory` maps an `LlmProvider` to a cached `IEmbeddingGenerator<string, Embedding<float>>`, wrapped by `ResilientEmbeddingGenerator` (same policy as `ResilientChatClient`). Not every provider implements it — `LlmProvider.Claude` throws `NotSupportedException` (no Anthropic embeddings API). Chat and embedding model ids are configured separately (`GeminiOptions.Model` vs `GeminiOptions.EmbeddingModel`); they version independently and vectors are only comparable within one model.
+- **Prompt-injection trust boundary** (`Application/Common/Ai/LlmContentGuard.cs`) — `WrapUntrustedContent` fences untrusted text (tool results, user text fed into one-shot LLM features) so a forged fence marker can't escape into instruction space; `SanitizeDisplayText` allow-lists model *output* before it reaches a UI/log/DB. In `SendChatCommandHandler`, every MCP tool result is wrapped, and a `ToolResultTrustBoundary` system message is prepended to the transient call list only (never to `threadMessages`, so it's never persisted).
 
 ### Real-time
-SignalR `NotificationHub` mapped at `/notifications`; backend pushes via typed `INotificationService` (`SignalRNotificationService`). Angular `SignalrService` subscribes with auto-reconnect and exposes an RxJS `Observable`.
+
+SignalR `NotificationHub` mapped at `/notifications`; backend pushes via typed `INotificationService` (`SignalRNotificationService`). The Angular `SignalrService` subscribes with auto-reconnect and exposes an RxJS `Observable`.
 
 ### Persistence & caching
-MongoDB via a custom generic `IDatabaseContext` (CRUD, offset + cursor pagination, ACID transactions with `IClientSessionHandle`, connection-pool tuning). The `Email` value object is stored via a custom `EmailSerializer` (registered in `ConfigurationSettingExtensions`). Repositories and the DB context are registered as **singletons**. A Redis distributed cache backs a **cache-aside** pattern on read-heavy paths (e.g. blog reads) — see `BlogCacheAsideTests` for the expected behavior.
 
-**Mongo indexes** are ensured at startup by `MongoIndexInitializer` (an `IHostedService` in `Infrastructure/Persistence/`): each collection declares its indexes in its own `IMongoIndexConfiguration` implementation under `Infrastructure/Persistence/Indexing/`, and implementations are assembly-scanned at registration. To index a new collection, add one new configuration class — no changes to the initializer or DI wiring. Index creation is idempotent and non-blocking: a failure is logged loudly but never stops startup.
+- **MongoDB** via a custom generic `IDatabaseContext` (CRUD, offset + cursor pagination, ACID transactions with `IClientSessionHandle`, connection-pool tuning). Repositories and the DB context are registered as **singletons**. The `Email` value object is stored via a custom `EmailSerializer` (registered in `ConfigurationSettingExtensions`).
+- **Redis** distributed cache backs a **cache-aside** pattern on read-heavy paths (e.g. blog reads) — see `BlogCacheAsideTests`.
+- **Indexes** are ensured at startup by `MongoIndexInitializer` (`IHostedService`). Each collection declares its indexes in an `IMongoIndexConfiguration` under `Infrastructure/Persistence/Indexing/`, assembly-scanned at registration — to index a new collection, add one config class. Creation is idempotent and non-blocking: failures are logged loudly but never stop startup.
 
 ### Frontend
-Angular standalone components (`inject()` API, `@if`/`@for` control flow). State via NgRx (actions/reducers/effects/selectors) for subject/course data. Lazy-loaded feature routes (`Auth`, `Blog`, `Courses`, `dashboard`) under multiple layouts (`MainLayout`, `CourseLayout`). Config (API base URL etc.) comes from `ConfigService` + `environments/`.
+
+Angular standalone components (`inject()` API, `@if`/`@for` control flow). State via NgRx (actions/reducers/effects/selectors) for subject/course data. Lazy-loaded feature routes (`Auth`, `Blog`, `Courses`, `dashboard`) under multiple layouts (`MainLayout`, `CourseLayout`). Config comes from `ConfigService` + `environments/`.
 
 ## Configuration
-API config is bound via the Options pattern (`IOptions<T>`) from `appsettings.json` sections: `McpServer`, `GeminiOptions`, `ClaudeOptions`, `BrevoEmail`, `Auth:PasswordReset`, plus Mongo and Redis connection settings. Provide LLM API keys, the MongoDB connection string, and the Redis connection before running. CORS allows `http://localhost:4200` and the deployed Render frontend.
 
-**Redis connection per environment:** the base `appsettings.json` leaves `ConnectionStrings:Redis` empty (empty → falls back to in-memory `IDistributedCache`, so the app still boots). Local dev sets `localhost:6379` in `appsettings.Development.json`. **Production** never commits a connection string — set the `ConnectionStrings__Redis` environment variable on the host (ASP.NET maps `__` to `ConnectionStrings:Redis` and it overrides the empty base value).
+Config is bound via the Options pattern (`IOptions<T>`) from `appsettings.json` sections: `McpServer`, `GeminiOptions`, `ClaudeOptions`, `BrevoEmail`, `Auth:PasswordReset`, plus Mongo and Redis settings. Provide LLM API keys, the MongoDB connection string, and the Redis connection before running. CORS allows `http://localhost:4200` and the deployed Render frontend.
+
+**Redis per environment:** base `appsettings.json` leaves `ConnectionStrings:Redis` empty (empty → falls back to in-memory `IDistributedCache`, so the app still boots). Local dev sets `localhost:6379` in `appsettings.Development.json`. Production never commits a connection string — set the `ConnectionStrings__Redis` environment variable on the host (ASP.NET maps `__` → `ConnectionStrings:Redis`, overriding the empty base).
