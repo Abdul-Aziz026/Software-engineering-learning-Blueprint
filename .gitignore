@@ -20,7 +20,6 @@
 **/.angular
 **/.vscode
 **/*.log
-**/environment.ts
 **/environment.prod.ts
 
 # ======================
