@@ -74,7 +74,9 @@ jobs:
       name: production
     steps:
       - name: Trigger Render deploy - backend
-        run: curl -f "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+        # imgURL overrides the tag pinned on the Render service, forcing it to
+        # pull THIS run's exact image instead of redeploying a stale cached tag.
+        run: curl -f "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}&imgURL=docker.io/${{ env.DOCKERHUB_NAMESPACE }}/backend:${{ github.sha }}"
 
   # ================= FRONTEND LANE =================
 
@@ -142,4 +144,6 @@ jobs:
       name: production
     steps:
       - name: Trigger Render deploy - frontend
-        run: curl -f "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+        # imgURL overrides the tag pinned on the Render service, forcing it to
+        # pull THIS run's exact image instead of redeploying a stale cached tag.
+        run: curl -f "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}&imgURL=docker.io/${{ env.DOCKERHUB_NAMESPACE }}/frontend:${{ github.sha }}"
