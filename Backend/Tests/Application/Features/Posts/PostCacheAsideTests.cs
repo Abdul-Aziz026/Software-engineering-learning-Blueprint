@@ -64,9 +64,17 @@ public class PostCacheAsideTests
         var postRepo = Substitute.For<IPostRepository>();
         postRepo.GetByIdAsync<Post>(PostId).Returns(post);
 
+        var postComment = new PostComment
+        {
+            Id = "c1",
+            PostId = PostId,
+            AuthorUsername = "bob",
+            Content = "first comment"
+        };
+
         var comments = new List<PostComment>
         {
-            new() { Id = "c1", PostId = PostId, AuthorUsername = "bob", Content = "first comment" }
+            postComment
         };
         var commentRepo = Substitute.For<IPostCommentRepository>();
         commentRepo.GetByPostIdAsync(PostId).Returns(comments);
@@ -109,28 +117,29 @@ public class PostCacheAsideTests
         postRepo.GetByIdAsync<Post>(PostId).Returns(post);
 
         var userRepo = Substitute.For<IUserRepository>();
+        // Id is assigned by the entity itself at construction, so the test follows it
+        // rather than dictating one.
         var user = User.Register("aziz", Email.Create("aziz@example.com"), "hash", "salt");
-        user.Id = "user-1";
-        userRepo.GetByIdAsync<User>("user-1").Returns(user);
+        userRepo.GetByIdAsync<User>(user.Id).Returns(user);
 
         var commentRepo = Substitute.For<IPostCommentRepository>();
         var handler = new AddCommentCommandHandler(postRepo, commentRepo, userRepo, cache);
 
         // Untrimmed content verifies the handler trims before persisting.
         var result = await handler.Handle(
-            new AddCommentCommand { PostId = PostId, UserId = "user-1", Content = "  nice post  " },
+            new AddCommentCommand { PostId = PostId, UserId = user.Id, Content = "  nice post  " },
             default);
 
         // Returned DTO reflects the new comment, stamped with the resolved author and trimmed content.
         Assert.Equal(PostId, result.PostId);
-        Assert.Equal("user-1", result.AuthorId);
+        Assert.Equal(user.Id, result.AuthorId);
         Assert.Equal("aziz", result.AuthorUsername);
         Assert.Equal("nice post", result.Content);
 
         // The comment was persisted with those same fields …
         await commentRepo.Received(1).AddAsync(Arg.Is<PostComment>(c =>
             c.PostId == PostId &&
-            c.AuthorId == "user-1" &&
+            c.AuthorId == user.Id &&
             c.AuthorUsername == "aziz" &&
             c.Content == "nice post"));
 

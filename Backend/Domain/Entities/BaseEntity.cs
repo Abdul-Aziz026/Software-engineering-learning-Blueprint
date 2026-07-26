@@ -4,8 +4,20 @@ namespace Domain.Entities;
 
 public abstract class BaseEntity
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    private readonly string _id = Guid.NewGuid().ToString();
 
+    public string Id
+    {
+        get => _id;
+        init
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Id cannot be null or whitespace.", nameof(value));
+            }
+            _id = value;
+        }
+    }
 
     public override bool Equals(object? obj)
     {
@@ -27,5 +39,19 @@ public abstract class BaseEntity
     public override int GetHashCode()
     {
         return Id.GetHashCode();
+    }
+
+    public static bool operator ==(BaseEntity? left, BaseEntity? right)
+    {
+        if (left is null)
+        {
+            return right is null;
+        }
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(BaseEntity? left, BaseEntity? right)
+    {
+        return !(left == right);
     }
 }

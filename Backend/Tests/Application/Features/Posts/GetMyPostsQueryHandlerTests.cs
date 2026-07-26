@@ -10,32 +10,39 @@ public class GetMyPostsQueryHandlerTests
 {
     private const string AuthorId = "author-1";
 
-    private static Post PostWith(string id, PostStatus status) => new()
+    private static Post PostWith(string id, PostStatus status)
     {
-        Id = id,
-        Title = $"Title {id}",
-        AuthorId = AuthorId,
-        AuthorUsername = "aziz",
-        Status = status
-    };
+        return new Post()
+        {
+            Id = id,
+            Title = $"Title {id}",
+            AuthorId = AuthorId,
+            AuthorUsername = "aziz",
+            Status = status
+        };
+    }
+
 
     // Full-field fake post so mapping tests exercise every PostSummaryDto property,
     // not just Id/Status. Mirrors what a real Mongo-hydrated Post looks like.
-    private static Post FullPost() => new()
+    private static Post FullPost()
     {
-        Id = "p1",
-        Title = "Understanding CQRS",
-        Content = "Full markdown body...",
-        Summary = "A short excerpt about CQRS.",
-        AuthorId = AuthorId,
-        AuthorUsername = "aziz",
-        CreatedAt = new DateTime(2026, 1, 5, 10, 0, 0, DateTimeKind.Utc),
-        UpdatedAt = new DateTime(2026, 1, 6, 9, 30, 0, DateTimeKind.Utc),
-        PublishedAt = new DateTime(2026, 1, 7, 8, 0, 0, DateTimeKind.Utc),
-        Status = PostStatus.Published,
-        LikeCount = 42,
-        CommentCount = 7
-    };
+        return new Post()
+        {
+            Id = "p1",
+            Title = "Understanding CQRS",
+            Content = "Full markdown body...",
+            Summary = "A short excerpt about CQRS.",
+            AuthorId = AuthorId,
+            AuthorUsername = "aziz",
+            CreatedAt = new DateTime(2026, 1, 5, 10, 0, 0, DateTimeKind.Utc),
+            UpdatedAt = new DateTime(2026, 1, 6, 9, 30, 0, DateTimeKind.Utc),
+            PublishedAt = new DateTime(2026, 1, 7, 8, 0, 0, DateTimeKind.Utc),
+            Status = PostStatus.Published,
+            LikeCount = 42,
+            CommentCount = 7
+        };
+    }
 
     // The author's OWN posts of every status come back — including Pending and Rejected,
     // which the public feed hides. This is the whole point of the "My Posts" view.
