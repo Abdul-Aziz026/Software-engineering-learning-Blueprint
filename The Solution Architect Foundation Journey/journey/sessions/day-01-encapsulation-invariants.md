@@ -200,6 +200,7 @@ Clean Architecture তে **domain layer এর entity গুলোই invariant
 3. **MongoDB এর একটা বিশেষ ফাঁদ — এটা খুব important তোমার জন্য।** Mongo C# driver deserialization এ প্রায়ই private setter বা field এ সরাসরি লেখে, constructor validation চালায় না। মানে DB তে আগে থেকে বসে থাকা একটা corrupt document তোমার guard এর ভেতর দিয়ে না গিয়েও invalid entity তৈরি করে ফেলবে। তাই:
    - Encapsulation টা **নতুন corruption** ঠেকায়, পুরোনোটা আপনা-আপনি ঠিক করে না।
    - Persistence layer টা তোমার invariant এর একটা **পেছনের দরজা** — জেনে রাখো, আর দরকার হলে load এর পরে সচেতনভাবে validate করো।
+   - Solution: সবচেয়ে ভালোভাবে মনে রাখার মতো বাক্য: Private setter prevents new code from corrupting the entity; it does not guarantee that persisted data was never already corrupt.
 
 4. **GIR XML tooling:** ওখানে নিশ্চয়ই "এই element থাকলে ওই element must থাকতে হবে" টাইপ rule আছে। এগুলো invariant। এখন কি এগুলো XML লেখার সময় ছড়িয়ে ছিটিয়ে check হচ্ছে, নাকি এমন একটা model আছে যেটা invalid combination কেই বানাতে দেয় না? (Day 31, Builder — এই প্রশ্নের উত্তরটাই।)
 
@@ -209,6 +210,7 @@ Clean Architecture তে **domain layer এর entity গুলোই invariant
 
 আজকের কৌশলটা সস্তা, কিন্তু তবুও প্রশ্ন করো:
 
+
 **কখন এটা over-engineering:**
 - **সত্যিকারের DTO / API contract / config object** — কোনো invariant নেই, শুধু ডেটা বইছে। `{ get; set; }` একেবারে ঠিক। এগুলোকে জোর করে rich domain object বানানো মূর্খতা।
 - **Serialization boundary** — যেখানে framework কে property লিখতে দিতেই হবে।
@@ -217,7 +219,9 @@ Clean Architecture তে **domain layer এর entity গুলোই invariant
 **কখন এটা non-negotiable:**
 - Money, balance, tax amount, filing status, state transition — অর্থাৎ যেখানে ভুল state এর মানে **ভুল টাকা বা ভুল compliance**। তোমার domain টা ঠিক এই ধরনের।
 
-সাধারণ নিয়ম: **encapsulation এর দাম দাও invariant এর ওজন অনুযায়ী।** কোনো rule নেই → simple property। টাকা/compliance জড়িত → পাহারা বসাও।
+সাধারণ নিয়ম: 
+- **encapsulation এর দাম দাও invariant এর ওজন অনুযায়ী।** কোনো rule নেই → simple property। টাকা/compliance জড়িত → পাহারা বসাও।
+- সবকিছুকে কঠিন করে লিখবে না। শুধু যেখানে ভুল হলে বড় ক্ষতি হবে, সেখানেই কঠোর protection দেবে।
 
 ---
 
