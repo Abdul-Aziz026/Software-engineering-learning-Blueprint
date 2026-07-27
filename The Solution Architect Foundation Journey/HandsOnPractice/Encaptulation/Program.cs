@@ -4,60 +4,6 @@ using Encaptulation;
 using System;
 using System.Collections.Generic;
 
-#region 5. YOUR TASK — daily withdrawal cap (an invariant spanning multiple doors)
-
-// Rule: total withdrawals in a single day must not exceed 50,000.
-//
-// Questions to answer with your design (this is the real lesson):
-//   - Where does "today's withdrawn total" live?  (Hint: inside, always inside.)
-//   - Who resets it? If the caller can reset it, the caller can bypass the rule.
-//   - How does the object know what "today" is without you passing it in every call
-//     (which the caller could lie about)?  -> inject a clock abstraction. That's DIP,
-//     Day 17. Notice how the principles start pulling on each other.
-//
-// Delete the NotImplementedException and write it yourself.
-
-public interface IClock { DateOnly Today { get; } }
-
-public sealed class SystemClock : IClock
-{
-    public DateOnly Today => DateOnly.FromDateTime(DateTime.UtcNow);
-}
-
-public sealed class CappedBankAccount
-{
-    // INVARIANT 1: Balance >= 0
-    // INVARIANT 2: sum of withdrawals on any single day <= DailyWithdrawalLimit
-    public const decimal DailyWithdrawalLimit = 50_000m;
-
-    private readonly IClock _clock;
-    private decimal _balance;
-    private DateOnly _windowDate;
-    private decimal _withdrawnToday;
-
-    public CappedBankAccount(decimal openingBalance, IClock clock)
-    {
-        // TODO(you): guard openingBalance, guard clock null, seed the window.
-        throw new NotImplementedException("Day 1 task — write this yourself.");
-    }
-
-    public decimal Balance => _balance;
-
-    public void Deposit(decimal amount)
-    {
-        // TODO(you)
-        throw new NotImplementedException("Day 1 task — write this yourself.");
-    }
-
-    public void Withdraw(decimal amount)
-    {
-        // TODO(you): roll the window if the day changed, then enforce BOTH invariants.
-        throw new NotImplementedException("Day 1 task — write this yourself.");
-    }
-}
-
-#endregion
-
 #region Test harness
 
 public static class Program
