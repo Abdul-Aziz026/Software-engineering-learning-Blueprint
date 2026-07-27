@@ -1,6 +1,6 @@
 # JOURNEY LOG — The Solution Architect Foundation Journey
 
-**START_DATE: 2026-07-25**
+**START_DATE: 2026-07-26**
 (Day number = (today − START_DATE) + 1. Never make up missed days.)
 
 **Repo root used:** `C:\Software Engineer Blueprint\The Solution Architect Foundation Journey`
@@ -13,4 +13,4 @@
 
 | Date | Day | Block | Topic | One-line takeaway |
 |---|---|---|---|---|
-| 2026-07-25 | 1 / 90 | M1 · W1 · OOP in depth | Encapsulation as invariant protection | Encapsulation isn't hiding fields — it's making illegal states unrepresentable, so no caller can ever break the rule. |
+| 2026-07-26 | 1 / 90 | M1 · W1 · OOP in depth | Encapsulation as invariant protection | Encapsulation isn't hiding fields — it's making illegal states unrepresentable, so no caller can ever break the rule. |
