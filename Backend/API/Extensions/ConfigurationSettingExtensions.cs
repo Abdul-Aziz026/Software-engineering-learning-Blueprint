@@ -1,4 +1,3 @@
-using Application.Settings;
 using Infrastructure.Configuration;
 using Infrastructure.Persistence.Serializers;
 using MongoDB.Bson.Serialization;

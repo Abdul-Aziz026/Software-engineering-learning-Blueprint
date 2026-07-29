@@ -1,7 +1,7 @@
 ﻿
 using Application.Common.Interfaces.Persistence;
-using Application.Settings;
 using Domain.Entities;
+using Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;

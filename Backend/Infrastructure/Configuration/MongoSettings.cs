@@ -1,13 +1,16 @@
-﻿namespace Application.Settings;
+namespace Infrastructure.Configuration;
 
 /// <summary>
-/// Represents configuration settings for connecting to a MongoDB database, including connection string, 
+/// Represents configuration settings for connecting to a MongoDB database, including connection string,
 /// database name, connection pooling, TLS, and retry options.
 /// </summary>
 /// <remarks>Use this class to configure MongoDB client behavior such as connection pooling limits, TLS
-/// encryption, and automatic retry policies. Adjust the properties based on your application's performance, 
-/// security, and reliability requirements. These settings are typically provided during application 
-/// startup or dependency injection configuration.</remarks>
+/// encryption, and automatic retry policies. Adjust the properties based on your application's performance,
+/// security, and reliability requirements. These settings are typically provided during application
+/// startup or dependency injection configuration.
+/// <para>Lives in Infrastructure, not Application: every property below maps 1:1 onto a
+/// <c>MongoClientSettings</c> knob, so keeping it here stops the driver's vocabulary from leaking
+/// into layers that must stay storage-agnostic.</para></remarks>
 public class MongoSettings
 {
     public string ConnectionString { get; set; } = string.Empty;
@@ -50,13 +53,13 @@ public class MongoSettings
     /// </summary>
     public bool LoadBalanced { get; set; } = false;
     /// <summary>
-    /// Indicating whether write operations should be retried automatically on 
+    /// Indicating whether write operations should be retried automatically on
     /// transient failures.
     /// </summary>
-    /// <remarks>When enabled, the system will attempt to retry write operations 
-    /// that fail due to temporary issues, such as network interruptions or server 
-    /// timeouts. This can improve reliability but may result in duplicate writes 
-    /// if the operation is not idempotent. Consider the implications for your 
+    /// <remarks>When enabled, the system will attempt to retry write operations
+    /// that fail due to temporary issues, such as network interruptions or server
+    /// timeouts. This can improve reliability but may result in duplicate writes
+    /// if the operation is not idempotent. Consider the implications for your
     /// application's data consistency before enabling.</remarks>
     public bool RetryWrites { get; set; } = true;
     /// <summary>
@@ -64,8 +67,3 @@ public class MongoSettings
     /// </summary>
     public bool RetryReads { get; set; } = false;
 }
-
-
-/*
- * add the settings reference: todo
- * */
