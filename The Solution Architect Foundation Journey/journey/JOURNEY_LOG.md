@@ -14,3 +14,4 @@
 | Date | Day | Block | Topic | One-line takeaway |
 |---|---|---|---|---|
 | 2026-07-26 | 1 / 90 | M1 · W1 · OOP in depth | Encapsulation as invariant protection | Encapsulation isn't hiding fields — it's making illegal states unrepresentable, so no caller can ever break the rule. |
+| 2026-07-27 | 2 / 90 | M1 · W1 · OOP in depth | Abstraction vs Encapsulation (`IPaymentProcessor`) | Encapsulation = who may touch the state; abstraction = which idea the caller works with. A good abstraction hides *how*; a bad one hides *whether it worked*. |

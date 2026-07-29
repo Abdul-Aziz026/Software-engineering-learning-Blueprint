@@ -15,8 +15,8 @@ Rule of thumb for self-rating:
 ### Week 1 — OOP in depth
 | Day | Topic | Rating | Last touched | Notes |
 |---|---|---|---|---|
-| 1 | Encapsulation as invariant protection | ok | 2026-07-25 | Taught today. Key shift: private fields ≠ encapsulation; the invariant is the point. Re-test on Day 7. |
-| 2 | Abstraction vs Encapsulation (`IPaymentProcessor`) | — | | |
+| 1 | Encapsulation as invariant protection | ok | 2026-07-26 | Taught Day 1. Key shift: private fields ≠ encapsulation; the invariant is the point. Re-test on Day 7. |
+| 2 | Abstraction vs Encapsulation (`IPaymentProcessor`) | ok | 2026-07-27 | Taught today. Key shift: abstraction is a *modelling judgment*, not access control. Golden test: can you name the library from the interface signature? Watch-outs: a wrong abstraction is worse than none; `Pending` state proves an abstraction must not hide *whether it worked*. Re-test on Day 7. |
 | 3 | Inheritance: when to use / when NOT ("is-a" test) | — | | |
 | 4 | Composition over Inheritance | — | | |
 | 5 | Polymorphism: subtype vs ad-hoc; vtable | — | | |
