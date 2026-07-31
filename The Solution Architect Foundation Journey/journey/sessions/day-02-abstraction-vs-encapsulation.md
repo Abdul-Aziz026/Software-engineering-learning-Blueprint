@@ -1,293 +1,230 @@
-# Day 2 of 90 — Abstraction vs Encapsulation (`IPaymentProcessor`)
+# Day 2 of 90 — Abstraction vs Encapsulation
 
 **Block:** Month 1 (Foundation: OOD + SOLID) · Week 1 (OOP in depth)
-**Date:** 2026-07-27 · Day 2 of 90
+**Originally written:** 2026-07-25 · **Simplified rewrite:** 2026-07-31
 
-কালকে শিখেছি — encapsulation মানে **পাহারা** (কে state বদলাতে পারবে)। আজকে অন্য অক্ষটা।
+> **Note:** এটা Day 2 এর সহজ version. আগের version টা topic এর তুলনায় বেশি ভারী ছিল।
+> আজকের লক্ষ্য একটাই ধারণা পরিষ্কার করা — বেশি না।
 
-আজকের এক লাইনের thesis:
+আজকের পুরো পাঠ এক লাইনে:
 
-> **Encapsulation ঠিক করে — ভেতরটা কে ছুঁতে পারবে। Abstraction ঠিক করে — caller কোন *ধারণা* নিয়ে কাজ করবে। প্রথমটা ভাঙলে data corrupt হয়। দ্বিতীয়টা ভাঙলে পুরো architecture টা corrupt হয়।**
+> **Encapsulation = ভেতরটা কে ছুঁতে পারবে।
+> Abstraction = বাইরে থেকে জিনিসটা কেমন দেখায়।**
+
+ব্যস। বাকিটা শুধু এই দুইটার উদাহরণ।
 
 ---
 
-## 1. The problem first — abstraction ছাড়া code টা কেমন দেখতে
+## 1. The problem first
 
-তোমার একটা invoice service লাগবে, payment নিতে হবে। Stripe দিয়ে শুরু:
+তোমার invoice এর টাকা নিতে হবে। Stripe দিয়ে লিখলে:
 
 ```csharp
-// ❌ Version 0 — কোনো abstraction নেই
 public class InvoiceService
 {
     private readonly StripeClient _stripe;
 
     public async Task PayAsync(Invoice invoice)
     {
-        var intent = await _stripe.PaymentIntents.CreateAsync(new PaymentIntentCreateOptions
-        {
-            Amount   = (long)(invoice.Total * 100),   // Stripe cents চায়
-            Currency = "usd",
-            Customer = invoice.StripeCustomerId       // 💀 Invoice এখন Stripe এর কথা জানে
-        });
-        invoice.MarkPaid(intent.Id);
+        var charge = await _stripe.Charges.CreateAsync(...);   // 💀 Stripe এর কথা এখানে
+        invoice.MarkPaid(charge.Id);
     }
 }
 ```
 
-তিন মাস পর business বলল: "US এ Stripe, Europe এ Adyen, আর একটা enterprise client bank transfer চায়।" তুমি লিখলে:
+তিন মাস পর boss বলল: "Europe এ Adyen লাগবে।"
 
-```csharp
-// ❌ Version 1 — if/else দিয়ে জোড়াতালি
-if (region == "US")        { /* Stripe code */ }
-else if (region == "EU")   { /* Adyen code, ওরা minor units আলাদা করে */ }
-else if (bankTransfer)     { /* কোনো API নেই — file generate হয়, ২ দিন পর settle হয় */ }
-```
+এখন `InvoiceService` খুলে ভেতরে হাত দিতে হবে। Test করতে Stripe SDK লাগবে। নতুন provider এলে আবার এই ফাইলে হাত।
 
-**এখন যা যা ভাঙল:**
+**এখানে খেয়াল করার জিনিসটা:** `Invoice` class টা কিন্তু ঠিকই ছিল — field private, guard আছে, Day 1 এর সব নিয়ম মানা। **তবুও design টা খারাপ।**
 
-- `InvoiceService` তিনটা SDK এর কথা জানে — test করতে তিনটা mock লাগে।
-- প্রত্যেকটা নতুন provider = এই ফাইলটা আবার edit (কাল Day 10 এ এটার নাম শিখব: **OCP violation**)।
-- সবচেয়ে খারাপ: bank transfer টা **সাথে সাথে succeed করে না**। তোমার সব code ধরে বসে আছে "payment মানে instant"। সেই ভুল ধারণাটাই এখন পুরো codebase এ ছড়িয়ে গেছে।
-
-খেয়াল করো — Version 0 তে **encapsulation ঠিকই ছিল**। `Invoice` এর field private, guard আছে। তবুও design টা পচা। **কারণ সমস্যাটা encapsulation এর না, abstraction এর।** এই দুইটা আলাদা জিনিস, আজকের পুরো পয়েন্ট এটাই।
+মানে সমস্যাটা encapsulation এর না। সমস্যাটা অন্য কিছু। ওটার নাম **abstraction**।
 
 ---
 
-## 2. The idea in plain language — analogy
+## 2. The idea — analogy
 
 **গাড়ির ড্যাশবোর্ড।**
 
-- **Encapsulation** = bonnet টা লক করা। তুমি চলতে চলতে ইঞ্জিনে হাত দিতে পারবে না। *(access control)*
-- **Abstraction** = ড্যাশবোর্ডে কী কী থাকবে সেই **সিদ্ধান্ত**। Steering, accelerator, brake, speedometer — এতটুকুই। Fuel injector এর timing না, coolant এর pressure না। *(কোন ধারণাটা তুমি দেখাচ্ছ)*
+- **Encapsulation** = bonnet টা লক করা। চলতে চলতে তুমি ইঞ্জিনে হাত দিতে পারবে না।
+- **Abstraction** = ড্যাশবোর্ডে কী কী থাকবে সেই **সিদ্ধান্ত**। Steering, brake, speedometer — এটুকুই। Fuel injector এর timing না।
 
-দুইটা আলাদা ব্যর্থতা:
+দুইটাই দরকার, কিন্তু দুইটা আলাদা কাজ:
 
-| ব্যর্থতা | মানে | ফল |
+| | প্রশ্ন | ভাঙলে কী হয় |
 |---|---|---|
-| Encapsulation ভাঙা | কেউ ইঞ্জিনে হাত দিয়ে দিল | একটা object corrupt |
-| **Leaky abstraction** | ড্যাশবোর্ডে "Set Fuel Injector Pulse Width" নব বসিয়ে দিলে | **প্রত্যেক ড্রাইভারকে ইঞ্জিন বুঝতে হবে** |
+| **Encapsulation** | কে state বদলাতে পারবে? | একটা object নষ্ট হয় |
+| **Abstraction** | caller কী দেখবে? | সবাইকে ইঞ্জিন বুঝতে হয় |
 
-আর সবচেয়ে বাজেটা: **ভুল abstraction।** ড্যাশবোর্ডে শুধু accelerator আর brake দিলে — মনে হবে সুন্দর, সরল। কিন্তু গাড়ি টার্ন নিতে পারবে না। **Abstraction টা যদি ভুল ধারণা দেয়, সেটা লুকানো detail এর চেয়েও বেশি ক্ষতিকর, কারণ ভুলটা তখন তোমার সব caller এর মধ্যে ছড়ায়।**
-
-উপরের bank transfer এর ঘটনাটা এটাই ছিল। "Payment instant" — এই ভুল ধারণাটা abstraction এ ঢুকে গিয়েছিল।
-
-**মনে রাখার বাক্য:**
-
-> Encapsulation একটা **enforcement** কৌশল। Abstraction একটা **modelling সিদ্ধান্ত** — অর্থাৎ judgment। তাই abstraction ভুল করা সহজ, আর ঠিক করা কঠিন।
+উপরের code টায় bonnet লক করা ছিল ✅, কিন্তু ড্যাশবোর্ডে "Stripe" লেখা ছিল ❌।
 
 ---
 
-## 3. Minimal runnable example — `IPaymentProcessor` টা design করা
+## 3. Minimal example
 
-Interface টা লেখার **আগে** তিনটা প্রশ্ন। এই তিনটা আজকের আসল skill:
+Interface টা লেখার সময় একটাই প্রশ্ন:
 
-1. **Caller আসলে কী চায়?** — "এই টাকাটা তোলো।" ব্যস। সে কোন provider, কোন retry, কোন webhook — কিছুই জানতে চায় না।
-2. **কোন detail টা provider-এর মধ্যে ভিন্ন হবেই?** — cents vs minor units, customer token এর নাম, sync vs async settlement. এগুলো **অবশ্যই ভেতরে থাকবে।**
-3. **কোন সত্যটা সব provider এর জন্য সত্য?** — এটাই abstraction এর আসল আকার। ⚠️ এবং settlement instant হওয়া সেই সত্যগুলোর একটা **না**।
+> **Caller আসলে কী চায়?** → "এই টাকাটা তোলো।" ব্যস। সে Stripe না Adyen, জানতে চায় না।
 
-### প্রথম চেষ্টা — যেটা প্রায় সবাই লেখে
+### ❌ খারাপ
 
 ```csharp
-// ⚠️ দেখতে ঠিক, কিন্তু leak করছে
 public interface IPaymentProcessor
 {
     Task<StripeChargeResponse> ChargeAsync(long amountInCents, string stripeCustomerId);
 }
 ```
 
-তিনটা leak, নাম ধরে বলো:
-- `StripeChargeResponse` — return type এ একটা vendor. Adyen implement করবে কীভাবে?
-- `amountInCents` — Stripe এর unit convention interface এ উঠে এসেছে। JPY এর cents নেই।
-- `stripeCustomerId` — vendor identity leak.
+নামটা `IPaymentProcessor`, কিন্তু ভেতরে তিন জায়গায় Stripe:
+- `StripeChargeResponse` — Stripe এর type
+- `amountInCents` — Stripe এর unit
+- `stripeCustomerId` — Stripe এর id
 
-### ভালো version
+Adyen এই interface implement করবে কীভাবে? পারবে না।
+
+### ✅ ভালো
 
 ```csharp
-// ---- Domain এর নিজের ভাষা, কোনো vendor শব্দ নেই ----
+public record PaymentRequest(decimal Amount, string Currency, string CustomerRef);
 
-public readonly record struct Money(decimal Amount, string Currency);   // Day 1 এর Money, একটু বড় হয়ে
-
-public sealed record PaymentRequest(
-    Money Amount,
-    string CustomerReference,      // *আমাদের* id, vendor এর না
-    string IdempotencyKey);        // পরে দেখাচ্ছি এটা কেন interface এ থাকা লাগে
-
-public enum PaymentState { Authorized, Settled, Pending, Failed }
-
-public sealed record PaymentResult(
-    PaymentState State,
-    string ProviderReference,      // opaque string. আমরা কখনো parse করব না।
-    string? FailureReason);
+public record PaymentResult(bool Success, string Reference, string? Error);
 
 public interface IPaymentProcessor
 {
-    Task<PaymentResult> ChargeAsync(PaymentRequest request, CancellationToken ct = default);
-    Task<PaymentResult> RefundAsync(string providerReference, Money amount, CancellationToken ct = default);
+    Task<PaymentResult> ChargeAsync(PaymentRequest request);
 }
 ```
 
-Implementation টাই একমাত্র জায়গা যেখানে vendor এর শব্দ থাকতে পারবে:
+কোথাও "Stripe" শব্দটা নেই। এখন Stripe শুধু **একটা** ফাইলে বন্দী:
 
 ```csharp
-public sealed class StripePaymentProcessor : IPaymentProcessor
+public class StripePaymentProcessor : IPaymentProcessor
 {
     private readonly StripeClient _stripe;
-    public StripePaymentProcessor(StripeClient stripe) => _stripe = stripe;
 
-    public async Task<PaymentResult> ChargeAsync(PaymentRequest r, CancellationToken ct = default)
+    public async Task<PaymentResult> ChargeAsync(PaymentRequest r)
     {
-        var intent = await _stripe.PaymentIntents.CreateAsync(new()
+        var charge = await _stripe.Charges.CreateAsync(new()
         {
-            Amount   = ToMinorUnits(r.Amount),          // এই কুৎসিত জ্ঞানটা এখানেই বন্দী
-            Currency = r.Amount.Currency.ToLowerInvariant(),
-            Customer = MapCustomer(r.CustomerReference)
-        }, new RequestOptions { IdempotencyKey = r.IdempotencyKey }, ct);
+            Amount   = (long)(r.Amount * 100),        // Stripe এর কুৎসিত detail এখানেই থাকল
+            Currency = r.Currency.ToLower(),
+            Customer = r.CustomerRef
+        });
 
-        return new PaymentResult(Map(intent.Status), intent.Id, intent.LastPaymentError?.Message);
+        return new PaymentResult(charge.Status == "succeeded", charge.Id, null);
     }
-
-    public Task<PaymentResult> RefundAsync(string providerReference, Money amount, CancellationToken ct = default)
-        => throw new NotImplementedException("তোমার কাজ।");
-
-    private static long ToMinorUnits(Money m) =>
-        ZeroDecimalCurrencies.Contains(m.Currency)      // JPY, KRW... cents নেই
-            ? (long)m.Amount
-            : (long)(m.Amount * 100);
-
-    private static PaymentState Map(string stripeStatus) => stripeStatus switch
-    {
-        "succeeded"              => PaymentState.Settled,
-        "requires_capture"       => PaymentState.Authorized,
-        "processing"             => PaymentState.Pending,
-        _                        => PaymentState.Failed
-    };
-
-    private static readonly HashSet<string> ZeroDecimalCurrencies =
-        new(StringComparer.OrdinalIgnoreCase) { "JPY", "KRW", "VND" };
-
-    private static string MapCustomer(string ourRef) => ourRef;   // আসলে একটা lookup হবে
 }
 ```
 
-আর caller টা এখন সরল, আর provider-অজ্ঞ:
+আর caller টা এখন শান্ত:
 
 ```csharp
-public sealed class InvoiceService
+public class InvoiceService
 {
     private readonly IPaymentProcessor _payments;
     public InvoiceService(IPaymentProcessor payments) => _payments = payments;
 
-    public async Task PayAsync(Invoice invoice, CancellationToken ct)
+    public async Task PayAsync(Invoice invoice)
     {
-        var result = await _payments.ChargeAsync(new PaymentRequest(
-            new Money(invoice.Total, invoice.Currency),
-            invoice.CustomerRef,
-            IdempotencyKey: $"invoice-{invoice.Id}-attempt-{invoice.AttemptCount}"), ct);
+        var result = await _payments.ChargeAsync(
+            new PaymentRequest(invoice.Total, invoice.Currency, invoice.CustomerRef));
 
-        switch (result.State)                        // Pending কে ignore করা যাবে না — এটাই মূল্যবান অংশ
-        {
-            case PaymentState.Settled:   invoice.MarkPaid(result.ProviderReference);      break;
-            case PaymentState.Authorized:invoice.MarkAuthorized(result.ProviderReference);break;
-            case PaymentState.Pending:   invoice.MarkAwaitingSettlement(result.ProviderReference); break;
-            case PaymentState.Failed:    invoice.MarkFailed(result.FailureReason);        break;
-        }
+        if (result.Success) invoice.MarkPaid(result.Reference);
+        else                invoice.MarkFailed(result.Error);
     }
 }
 ```
 
-### দুইটা সিদ্ধান্ত ব্যাখ্যা করা দরকার — এগুলোই আজকের গভীর অংশ
+Adyen লাগলে নতুন একটা class লিখবে। `InvoiceService` এ **একটা লাইনও** বদলাবে না।
 
-**(a) কেন `IdempotencyKey` interface এ আছে? এটা তো vendor এর জিনিস মনে হয়?**
+**মনে রাখার পরীক্ষা:**
 
-মনে হয়, কিন্তু না। Network এ টাকা পাঠানোর অর্থই হলো — তুমি জানো না request টা পৌঁছেছিল কি না। তাই "retry করলে double charge হবে না" — এই দরকারটা **provider এর detail না, ডোমেইনের সত্য**। যেই abstraction এটা লুকায়, সেটা caller কে চুপচাপ double-charge bug দিয়ে দেয়।
-
-> **নিয়ম: যে detail টা caller এর সিদ্ধান্ত বদলে দেয়, সেটা লুকানো যাবে না। ওটা detail না, ওটাই contract.**
-
-**(b) কেন `PaymentState.Pending` আছে?**
-
-কারণ bank transfer instant না। আমি যদি `Task<bool>` return করতাম, abstraction টা দেখতে **আরও সুন্দর** হতো — আর সেটাই ফাঁদ। ওটা মিথ্যা বলত। **Abstraction এর কাজ সত্যকে সরল করা, সত্যকে বদলে দেওয়া না।**
-
-এই লাইনটা মনে রাখো:
-
-> A good abstraction hides **how**. A bad abstraction hides **whether it worked**.
+> **Interface টা পড়ে কি বলা যায় কোন library ব্যবহার হচ্ছে?
+> বলা গেলে — ওটা abstraction না, ওটা wrapper.**
 
 ---
 
-## 4. Apply it in your world — Orbitax .NET stack
+## 4. Apply it — তোমার Orbitax stack
 
-**(1) Clean Architecture তে interface টা কোথায় থাকে?** এটাই সবচেয়ে বেশি ভুল হয়।
+আজ **একটাই** কাজ, ১০ মিনিট।
 
-`IPaymentProcessor` থাকবে **Application/Domain layer এ**, Infrastructure এ না। কারণ interface টার মালিক হলো **caller**, implementer না। Implementation (`StripePaymentProcessor`) থাকবে Infrastructure এ, আর ভেতরের দিকে তাকিয়ে থাকবে। (Day 17-18 এ এটার নাম পাবে — **DIP**, আর এই মালিকানার ব্যাপারটাই বেশিরভাগ লোক miss করে।)
+তোমার একটা MediatR handler খোলো। ওর constructor এর dependency গুলো দেখো। প্রত্যেকটা interface এর নামে এই প্রশ্ন করো:
 
-দ্রুত পরীক্ষা: **Infrastructure project টা মুছে দিলে Application project টা compile করবে?** করলে abstraction ঠিক জায়গায়। না করলে leak আছে।
+> **এই নামটা কি একটা business ধারণা, নাকি একটা technology?**
 
-**(2) MediatR handler গুলোতে হান্ট করো (আজ, ১৫ মিনিট):** তোমার একটা handler খোলো, আর ওর dependency গুলো দেখো। প্রত্যেকটা interface এ প্রশ্ন করো — *"এই নামটা কি একটা business ধারণা, নাকি একটা technology?"*
+- `ITaxFilingSubmitter` → ধারণা ✅
+- `IMongoRepository` → technology 🚩
 
-- `ITaxFilingSubmitter` → business ধারণা ✅
-- `IMongoCollectionWrapper` → technology, ছদ্মবেশে 🚩
+আর repository তে একটা জিনিস খোঁজো: কোনো method কি `IQueryable`, `FilterDefinition<T>`, বা `BsonDocument` return করে বা নেয়? করলে Mongo leak করছে — caller এখন database এর কথা জানে।
 
-**(3) তোমার MongoDB repository — সবচেয়ে সম্ভাব্য leak.** যদি কোনো method `IQueryable`, `FilterDefinition<T>`, বা `BsonDocument` return করে বা নেয় — তোমার abstraction leak করছে। Caller এখন Mongo এর কথা জানে, তাই in-memory দিয়ে test করা যাবে না, আর কোনোদিন storage বদলানো অসম্ভব। (Day 15-16 এ ISP তে আবার আসছে।)
-
-**(4) তোমার GIR XML tooling — আসল সোনার খনি।** OECD schema টা ভয়ঙ্কর detailed। প্রশ্ন: caller `XElement` বানাচ্ছে, নাকি একটা domain model বানাচ্ছে যেটা XML এ translate হয়? প্রথমটা হলে schema টা তোমার পুরো codebase এ leak করছে, আর schema version 2.0 আসলে সব জায়গায় হাত দিতে হবে। দ্বিতীয়টা হলে একটা জায়গায় বদলালেই হবে।
-
-**(5) তোমার TTS abstraction (Day 36 এ Adapter হিসেবে ফিরবে):** নিজেকে জিজ্ঞাসা করো — interface টার নাম কি `ISpeechSynthesizer` (ধারণা) নাকি `IAzureTtsWrapper` (vendor)? আর voice/format/rate গুলো কি vendor এর enum ব্যবহার করছে? করলে সেটা vendor lock, শুধু একটা interface এর ছদ্মবেশে।
-
-**সোনালী পরীক্ষা, সব ক্ষেত্রেই এটা চালাও:**
-
-> **Interface এর নাম আর ওর সব parameter/return type পড়ে কি বলা যায় কোন library টা ব্যবহার হচ্ছে? বলা গেলে সেটা abstraction না, সেটা একটা wrapper.**
+*(Clean Architecture তে interface টা কোন layer এ থাকা উচিত — সেই আলোচনাটা Day 17-18, DIP এর দিন। আজ শুধু নাম আর type দেখো।)*
 
 ---
 
-## 5. "Is there a simpler way?" — সবসময় এই প্রশ্নটা
+## 5. "Is there a simpler way?"
 
-আজকে প্রশ্নটা খুব দরকারি, কারণ "সবকিছুর জন্য interface" — এটা .NET জগতের সবচেয়ে common over-engineering.
+হ্যাঁ, প্রায়ই। **.NET এ সবচেয়ে বড় over-engineering হলো — সবকিছুর জন্য interface।**
 
-**কখন abstraction টা লাগবেই না:**
+**Interface লাগবে না যখন:**
+- একটাই implementation, দ্বিতীয়টার কোনো সম্ভাবনা নেই। `IUserMapper` → `UserMapper` — এটা শুধু ceremony। Class টা সরাসরি inject করো।
+- শুধু mock করার জন্য বানাচ্ছ।
 
-- **একটাই implementation, আর দ্বিতীয়টার কোনো সম্ভাবনা নেই।** `IUserMapper` এর একটামাত্র `UserMapper` — ওটা নিছক ceremony। Class টা সরাসরি inject করো। দরকার হলে পরে interface বের করে নেবে; Visual Studio এ ওটা ১০ সেকেন্ডের কাজ। **YAGNI আসল।**
-- **শুধু mock করার জন্য interface।** এটা একটা code smell, যদিও অনেকে করে। যদি জিনিসটা pure logic হয়, mock না করে আসল টা দিয়েই test করো — test টা আরও ভালো হবে।
-- **`IDateTimeProvider` টাইপ micro-abstraction** যদি একটা জায়গায় লাগে। যদি ২০ জায়গায় লাগে, তখন লাগবে।
-
-**কখন abstraction টা non-negotiable:**
-
+**Interface লাগবেই যখন:**
 - একাধিক implementation **আজই** আছে (Stripe + Adyen)।
-- একটা **external boundary** — network, payment, filing authority, file system, clock। এগুলো slow, flaky, আর expensive to test। তোমার ডোমেইন এদের ভরা।
-- Provider বদলানোর খরচ যেখানে বিশাল (regulatory/vendor migration)।
+- বাইরের কিছুর সাথে কথা বলছ — payment, network, file, filing authority। এগুলো ছাড়া test করা কঠিন।
 
-**সবচেয়ে দামি কথাটা আজকের:** একটা **ভুল** abstraction, কোনো abstraction না থাকার চেয়ে খারাপ। Duplicated code refactor করা সহজ। কিন্তু ২০০ জায়গায় বসে যাওয়া একটা ভুল interface — ওটা নরক। তাই:
+**আজকের সবচেয়ে দামি লাইন:**
 
-> **Two implementations দেখার আগে abstract করো না।** একটা example দিয়ে তুমি বুঝতেই পারবে না কোনটা আসল variation আর কোনটা কাকতালীয়। এই কারণেই সিনিয়ররা "rule of three" বলে।
+> **ভুল abstraction, কোনো abstraction না থাকার চেয়ে খারাপ।**
+> Duplicate code পরে সহজে ঠিক করা যায়। কিন্তু ২০০ জায়গায় বসে যাওয়া একটা ভুল interface — ওটা সরানো নরক।
+> তাই **দুইটা implementation চোখে না দেখা পর্যন্ত abstract করো না।**
 
 ---
 
-## 6. আজকের hands-on task (লিখতে হবে, পড়লে হবে না)
+## 6. আজকের hands-on task
 
-`journey/code/day-02/Day02.cs` তে scaffold আছে। **নিজে টাইপ করো।**
+`journey/code/day-02/Day02.cs` তে scaffold আছে। **আজকের জন্য এই তিনটাই যথেষ্ট:**
 
-1. Leaky `IPaymentProcessor` টা (file এর মাথায় আছে) পড়ো, আর comment এ **তিনটা leak নাম ধরে লেখো।**
-2. পরিষ্কার abstraction টা নিজে লেখো: `Money`, `PaymentRequest`, `PaymentResult`, `IPaymentProcessor`.
-3. **দুইটা** implementation লেখো — `FakePaymentProcessor` (সবসময় Settled) আর `BankTransferPaymentProcessor` (সবসময় **Pending**)।
-4. **আসল কাজ:** `InvoiceService` লেখো যেটা দুইটার সাথেই কাজ করে। Compiler কে দিয়ে জোর করাও যেন `Pending` handle করতেই হয়। এখানেই টের পাবে — `Task<bool>` return করলে আজ এই bug টা তুমি ধরতেই পারতে না।
-5. **তারপর ইচ্ছা করে abstraction টা ভাঙো:** interface এ একটা method যোগ করো — `Task<StripeCustomer> GetStripeCustomerAsync(string id)`. এখন `BankTransferPaymentProcessor` এ ওটা implement করার চেষ্টা করো। **ব্যথাটা অনুভব করো** — এই ব্যথাই leaky abstraction এর নাম, আর Day 12 (LSP) আর Day 15 (ISP) এ এই একই ব্যথা ফিরে আসবে। তারপর method টা মুছে দাও।
-6. **তোমার নিজের codebase:** একটা আসল interface বের করো যেটা vendor detail leak করছে। `notes.md` তে লেখো — leak টা কী, আর leak না করে কী নাম/type হতে পারত।
+1. Leaky interface টার তিনটা leak comment এ লেখো। ✅ *(তুমি এটা করে ফেলেছ)*
+2. পরিষ্কার version টা নিজে টাইপ করো — `PaymentRequest`, `PaymentResult`, `IPaymentProcessor`.
+3. দুইটা fake implementation লেখো, আর `InvoiceService` টা **দুইটার সাথেই** চালাও — একটা লাইনও না বদলে। এই মুহূর্তটাই আজকের পুরো শিক্ষা।
 
-চালাতে: console project এ ফেলে `dotnet run` (কোনো Stripe SDK লাগবে না — সব fake)।
+**তারপর, সময় থাকলে (optional):**
+
+4. Interface এ একটা Stripe-only method যোগ করো: `Task<StripeCustomer> GetStripeCustomerAsync(string id);`
+   এখন bank transfer class এ ওটা implement করার চেষ্টা করো। পারবে না — throw করা ছাড়া উপায় নেই।
+   **এই ব্যথাটাই** Day 12 (LSP) আর Day 15 (ISP) এর বীজ। অনুভব করে method টা মুছে দাও।
+
+5. তোমার নিজের code এ একটা leaky interface খুঁজে `notes.md` তে লেখো।
+
+*(File এ `Money`, `IdempotencyKey`, `PaymentState.Pending` — এগুলো আছে। আজ ওগুলো নিয়ে মাথা ঘামিও না, নিচের bonus এ এক প্যারায় বলে দিলাম।)*
 
 ---
 
 ## 7. One-line self-check
 
-> **নিজের ভাষায় বলো: একটা class পুরোপুরি encapsulated (সব field private, সব guard আছে) — তবুও ওর abstraction ভয়ানক খারাপ হতে পারে। একটা উদাহরণ দাও।**
+> **নিজের ভাষায় বলো: Encapsulation আর Abstraction এর পার্থক্য কী?**
 
-উত্তরে এই ধারণাটা থাকা চাই: encapsulation = access control (কে ছুঁতে পারবে), abstraction = কোন ধারণা/model টা তুমি দেখাচ্ছ। Method এর নাম বা signature যদি vendor detail ফাঁস করে, বা caller কে মিথ্যা ধারণা দেয় (যেমন "সব payment instant"), তাহলে state টা perfect পাহারায় থাকলেও design টা পচা।
+সহজ উত্তর: encapsulation ঠিক করে **কে ভেতরে ঢুকতে পারবে**; abstraction ঠিক করে **বাইরে থেকে কী দেখা যাবে**। একটা class পুরোপুরি encapsulated হয়েও খারাপ abstraction দিতে পারে — যেমন `IPaymentProcessor` যার signature এ Stripe লেখা।
+
+---
+
+## Bonus (আজ skip করলেও চলবে — Day 12/15 এ ফিরবে)
+
+Code file এ দুইটা জিনিস আছে যা আজকের পাঠের বাইরে, তবু বাস্তব code এ লাগে:
+
+- **`IdempotencyKey`** — network এ request পাঠালে তুমি জানো না ওটা পৌঁছেছিল কি না। Retry করলে দুইবার charge হয়ে যেতে পারে। তাই একটা unique key পাঠাও — provider দেখে বলে "এটা তো আগেই করেছি" আর আগের result ফেরত দেয়।
+- **`PaymentState.Pending`** — bank transfer সাথে সাথে হয় না, ২ দিন লাগে। `bool Success` দিয়ে ওটা প্রকাশ করা যায় না, তাই invoice ভুল করে "Paid" হয়ে যায়। এটা একটা সুন্দর নিয়মের উদাহরণ: **abstraction detail লুকাবে, কিন্তু সত্য বদলাবে না।**
+
+দুইটাই এখন শুধু চিনে রাখো। আজকের পরীক্ষায় আসবে না।
 
 ---
 
 ## কালকের প্রস্তুতি (Day 3)
 
-**Inheritance: কখন ব্যবহার করবে, আর কখন করবে না — "is-a" test.**
+**Inheritance: কখন ব্যবহার করবে, কখন করবে না — "is-a" test.**
 
-আজকে দেখলাম abstraction একটা judgment. কালকে দেখব সবচেয়ে বেশি misuse হওয়া abstraction টুল — inheritance. `class SavingsAccount : BankAccount` লিখতে ৩ সেকেন্ড লাগে, আর ওটা তোমাকে ৩ বছর ভোগাতে পারে। প্রশ্নটা কখনোই "code share করা যাবে?" না — প্রশ্নটা "এটা কি সত্যিই একটা BankAccount, base এর সব প্রতিশ্রুতি সহ?"
+`class SavingsAccount : BankAccount` লিখতে ৩ সেকেন্ড লাগে, আর ভুল হলে ৩ বছর ভোগায়। প্রশ্নটা কখনোই "code share করা যাবে?" না।
 
 ---
 

@@ -1,17 +1,15 @@
-# JOURNEY LOG — The Solution Architect Foundation Journey
+# JOURNEY_LOG.md
 
-**START_DATE: 2026-07-26**
-(Day number = (today − START_DATE) + 1. Never make up missed days.)
+## Day 1
+- **Date**: 2026-07-24 (Wednesday)
+- **Topic**: Encapsulation as invariant protection
+- **Estimated Time**: [≤1hr]
+- **Actual Time**: 1h
+- **Takeaway**: Encapsulation protects object state and enforces invariants.
 
-**Repo root used:** `C:\Software Engineer Blueprint\The Solution Architect Foundation Journey`
-> Assumption noted on Day 1: the prompt referenced `C:\Abdul Aziz\Software-engineering-learning-Blueprint`,
-> but the folder actually mounted for this scheduled task is the one above (it contains
-> `OOD-Design-Patterns-3-Month-Plan.pdf`). All `journey/` files live here. If Aziz wants the other
-> path, move the `journey/` folder and re-point the task's folder — nothing else needs to change.
-
----
-
-| Date | Day | Block | Topic | One-line takeaway |
-|---|---|---|---|---|
-| 2026-07-26 | 1 / 90 | M1 · W1 · OOP in depth | Encapsulation as invariant protection | Encapsulation isn't hiding fields — it's making illegal states unrepresentable, so no caller can ever break the rule. |
-| 2026-07-27 | 2 / 90 | M1 · W1 · OOP in depth | Abstraction vs Encapsulation (`IPaymentProcessor`) | Encapsulation = who may touch the state; abstraction = which idea the caller works with. A good abstraction hides *how*; a bad one hides *whether it worked*. |
+## Day 2
+- **Date**: 2026-07-25 (Thursday)
+- **Topic**: Abstraction design (good vs bad interfaces)
+- **Estimated Time**: [≤1hr]
+- **Actual Time**: 1h
+- **Takeaway**: Good abstractions hide implementation details and expose intent.

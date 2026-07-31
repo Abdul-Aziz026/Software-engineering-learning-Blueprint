@@ -1,8 +1,8 @@
 
 namespace Abstraction;
 
-// Day 1 habit: invariants stay guarded.
-// INVARIANT: Total > 0; State only moves forward.
+// Day 1 habit: invariants stay guarded...
+// INVARIANT: Total > 0; State only moves forward...
 public sealed class Invoice
 {
     public Invoice(string id, decimal total, string currency, string customerRef)
