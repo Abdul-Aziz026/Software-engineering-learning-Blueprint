@@ -1,5 +1,5 @@
 ﻿// Level up — make illegal states unrepresentable
-namespace Encaptulation;
+namespace Encaptulation.Project;
 
 
 // `decimal` allows -5000, so BankAccount needs a runtime check.

@@ -20,3 +20,6 @@ public sealed class Order
     // immutable too. If they were mutable, IReadOnlyList would still leak them.
 }
 
+
+
+public sealed record OrderLine(string Sku, int Quantity);

@@ -1,6 +1,7 @@
 ﻿// Day 01 — Encapsulation as invariant protection
 // Journey: The Solution Architect Foundation Journey (Day 1 of 90)
 using Encaptulation;
+using Encaptulation.Project;
 using System;
 using System.Collections.Generic;
 
@@ -49,21 +50,7 @@ public static class Program
 
         Section("STEP 5 — your task");
 
-        try
-        {
-            var capped = new CappedBankAccount(200_000m, new SystemClock());
-            capped.Withdraw(30_000m);
-            capped.Withdraw(30_000m);   // should breach the 50k daily cap
-            Console.WriteLine("  ❌ daily cap was NOT enforced — invariant #2 is broken");
-        }
-        catch (NotImplementedException)
-        {
-            Console.WriteLine("  ⏳ CappedBankAccount not written yet — that's today's homework.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine($"  ✅ daily cap enforced: {ex.Message}");
-        }
+        ProjectDemoRunner.Run();
 
         Console.WriteLine();
         Console.WriteLine("Self-check: all fields are private and encapsulation can STILL be broken — how?");

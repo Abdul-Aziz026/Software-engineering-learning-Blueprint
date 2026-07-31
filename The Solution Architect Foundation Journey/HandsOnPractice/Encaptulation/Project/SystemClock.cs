@@ -1,4 +1,4 @@
-﻿namespace Encaptulation;
+﻿namespace Encaptulation.Project;
 
 public sealed class SystemClock : IClock
 {
