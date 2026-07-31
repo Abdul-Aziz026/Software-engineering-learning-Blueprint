@@ -17,7 +17,7 @@ Rule of thumb for self-rating:
 |---|---|---|---|---|
 | 1 | Encapsulation as invariant protection | ok | 2026-07-26 | Taught Day 1. Key shift: private fields ≠ encapsulation; the invariant is the point. Re-test on Day 7. |
 | 2 | Abstraction vs Encapsulation (`IPaymentProcessor`) | ok | 2026-07-31 | Encapsulation = who may touch the state; abstraction = what the outside sees. Golden test: can you name the library from the interface signature? Session was rewritten simpler on request — `IdempotencyKey` / `Pending` moved to a bonus note (revisit Day 12 & 15). Re-test on Day 7. |
-| 3 | Inheritance: when to use / when NOT ("is-a" test) | — | | |
+| 3 | Inheritance: when to use / when NOT ("is-a" test) | ok | 2026-07-31 | Taught Day 3. Core shift: inheritance = adoption (full public surface + all future base changes), not code reuse. English "is-a" is unreliable — test behavioural substitutability. Fragile base class demoed via `LegacyReport.Delete()`. Good-inheritance shape: abstract base, ~no state, enforces one rule, 1 level deep. Seeds LSP (Day 12) and Template Method (Day 49). Re-test on Day 7. |
 | 4 | Composition over Inheritance | — | | |
 | 5 | Polymorphism: subtype vs ad-hoc; vtable | — | | |
 | 6 | Coupling & Cohesion | — | | |
