@@ -9,7 +9,7 @@
 //     (which the caller could lie about)?  -> inject a clock abstraction. That's DIP,
 //     Day 17. Notice how the principles start pulling on each other.
 
-namespace Encaptulation;
+namespace Encaptulation.Project;
 
 
 public sealed class CappedBankAccount
