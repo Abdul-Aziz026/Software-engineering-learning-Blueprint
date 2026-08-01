@@ -20,3 +20,10 @@
 - **Estimated Time**: [≤1hr]
 - **Actual Time**:
 - **Takeaway**: Inheritance is adoption, not borrowing — the subclass takes the base's entire public surface and every future addition. Test with behavioural substitutability, not English vocabulary.
+
+## Day 4
+- **Date**: 2026-08-01 (Saturday)
+- **Topic**: Composition over Inheritance — same feature built both ways
+- **Estimated Time**: [≤1hr]
+- **Actual Time**:
+- **Takeaway**: Inheritance welds behaviour into the type at compile time; composition makes behaviour a field, so it can be swapped at runtime. Two independent axes of variation grow as `M × N` with inheritance but `M + N` with composition — and inheritance still wins when the base's job is to *enforce a rule*, not to hand out behaviour.
