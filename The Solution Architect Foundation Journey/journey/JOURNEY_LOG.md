@@ -27,3 +27,10 @@
 - **Estimated Time**: [≤1hr]
 - **Actual Time**:
 - **Takeaway**: Inheritance welds behaviour into the type at compile time; composition makes behaviour a field, so it can be swapped at runtime. Two independent axes of variation grow as `M × N` with inheritance but `M + N` with composition — and inheritance still wins when the base's job is to *enforce a rule*, not to hand out behaviour.
+
+## Day 5
+- **Date**: 2026-08-02 (Sunday)
+- **Topic**: Polymorphism — subtype vs ad-hoc, and the vtable behind `override`
+- **Estimated Time**: [≤1hr]
+- **Actual Time**:
+- **Takeaway**: `override` seizes the base's vtable slot; `new` builds a slot beside it and leaves the base's untouched — which is why one object gives two different answers depending on the *declared* type of the reference. Overload is chosen by the compiler from what you declared; override is chosen by the CLR from what the object actually is. And the real culprit is rarely the `new` keyword — it's the fake default in the base (`return 0m`) that should have been `abstract`, so the compiler stops you instead of the customer.
