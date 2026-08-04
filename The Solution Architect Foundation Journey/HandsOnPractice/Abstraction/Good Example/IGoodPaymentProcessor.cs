@@ -51,6 +51,4 @@ public sealed class BankTransferPaymentProcessor : IGoodPaymentProcessor
 
 public record struct Money(decimal Amount, string Currency);
 
-public class PaymentRequest
-{
-}
+public record PaymentRequest(string IdempotencyKey, Money Amount, string CustomerReference);
