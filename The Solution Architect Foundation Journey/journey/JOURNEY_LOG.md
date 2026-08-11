@@ -41,3 +41,11 @@
 - **Estimated Time**: [≤1hr]
 - **Actual Time**:
 - **Takeaway**: Cohesion is the inside question (do these things belong to each other?), coupling is the outside question (who breaks when I break?). Cut along *"who asks for the change"*, not along *"what the code does"* — things that read together aren't necessarily things that change together. The honest measuring instrument for coupling is the unit test: whatever you must stand up to test a class **is** its coupling, so "this is hard to test" is never a testing complaint, it's a design diagnosis. And coupling can never be zero — only moved from volatile to stable: depend downward, on things that change more slowly than you do. Over-splitting (three one-rule validator classes that all change for the same compliance reason) is low cohesion wearing a different costume.
+
+## Day 7 — 🔁 Retrieval Day (Week 1)
+- **Date**: 2026-08-11 (Tuesday)
+- **Topic**: Retrieval / self-test — Days 1–6 (Encapsulation, Abstraction, Inheritance, Composition, Polymorphism, Coupling & Cohesion)
+- **Estimated Time**: [45–60 min]
+- **Actual Time**:
+- **Format**: No new material. 43 recall questions + 6 code-judgment snippets + 5 architect-judgment prompts at the top; answers in a separate section at the bottom for honest self-testing.
+- **Takeaway**: Week 1 is six versions of one question — *কে কার উপর ক্ষমতা রাখে?* Days 1–2 ask it inside one class (who may touch the state, what does the outside see), Days 3–5 ask it between two types (how much power is the base handing out, whose version actually runs), Day 6 asks it across the whole system (who breaks when I break). Retrieval itself is the lesson today: recognition is not recall, so the answers were deliberately quarantined at the bottom — reading them early converts a memory test into a reading exercise. The trap question (C6, a plain DTO that needs no fixing) exists because after six days of "here is the bad version," the reflex to refactor everything is itself the next junior mistake.
