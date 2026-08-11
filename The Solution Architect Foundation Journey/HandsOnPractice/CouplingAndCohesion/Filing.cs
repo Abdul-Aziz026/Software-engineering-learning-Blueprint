@@ -11,11 +11,6 @@ public class Filing
     public decimal Amount { get; set; }
     public string Country { get; set; } = string.Empty;
     public string UserEmail { get; set; } = string.Empty;
-
-    public string TaxpayerName { get; set; } = string.Empty;
-    public string TaxpayerId { get; set; } = string.Empty;
-    public DateTime SubmittedAt { get; set; }
-    public string Currency { get; set; } = "USD";
     public FilingStatus Status { get; set; } = FilingStatus.Pending;
 }
 

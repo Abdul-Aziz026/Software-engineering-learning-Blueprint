@@ -9,6 +9,10 @@ public interface IGoodPaymentProcessor
 
 public class PaymentResult
 {
+    public PaymentResult(PaymentState payment, string card, string _)
+    {
+        
+    }
 }
 
 public sealed class FakeCardPaymentProcessor : IGoodPaymentProcessor
@@ -52,3 +56,9 @@ public sealed class BankTransferPaymentProcessor : IGoodPaymentProcessor
 public record struct Money(decimal Amount, string Currency);
 
 public record PaymentRequest(string IdempotencyKey, Money Amount, string CustomerReference);
+
+public enum PaymentState
+{
+    Pending,
+    Settled
+}
