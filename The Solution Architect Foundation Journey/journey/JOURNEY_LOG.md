@@ -49,3 +49,10 @@
 - **Actual Time**:
 - **Format**: No new material. 43 recall questions + 6 code-judgment snippets + 5 architect-judgment prompts at the top; answers in a separate section at the bottom for honest self-testing.
 - **Takeaway**: Week 1 is six versions of one question — *কে কার উপর ক্ষমতা রাখে?* Days 1–2 ask it inside one class (who may touch the state, what does the outside see), Days 3–5 ask it between two types (how much power is the base handing out, whose version actually runs), Day 6 asks it across the whole system (who breaks when I break). Retrieval itself is the lesson today: recognition is not recall, so the answers were deliberately quarantined at the bottom — reading them early converts a memory test into a reading exercise. The trap question (C6, a plain DTO that needs no fixing) exists because after six days of "here is the bad version," the reflex to refactor everything is itself the next junior mistake.
+
+## Day 8
+- **Date**: 2026-08-14 (Friday)
+- **Topic**: SRP — "one reason to change" = one **actor** to answer to
+- **Estimated Time**: [≤1hr]
+- **Actual Time**:
+- **Takeaway**: SRP-এর "reason" মানে কোনো technical কারণ না — মানে **একজন মানুষ**; Uncle Bob-এর শোধরানো সংজ্ঞা হলো *responsible **to** one actor*, *responsible **for** one task* না। তাই কাঁচি চালাতে হয় actor গুনে, method গুনে না — যে কারণে `BankAccount`-এর তিনটা method এক actor-এর হওয়ায় ভাঙা **ভুল**, আর তিন actor-এর `Employee` ভাঙা **ঠিক**। আজকের আসল আবিষ্কার: দুই actor একটা shared private helper (`RegularHours()`) ভাগ করলে একজনের অনুরোধে আরেকজনের সংখ্যা **নীরবে** বদলে যায় — compiler চুপ, test সবুজ, শুধু report ভুল (accidental duplication)। তাই DRY-এর মানে "একরকম দেখতে কোড দুইবার থাকবে না" না, "একই *জ্ঞান* দুই জায়গায় থাকবে না" — পরীক্ষা: *একজনের অনুরোধে বদলালে অন্যজনও কি সেই বদলটাই চাইত?* না হলে ওটা duplication না, coincidence। Invariant entity-র ভেতরে থাকে, policy বাইরে যায়; আর class-boundary org-chart-এর মতো দেখতে হওয়াটা কাকতালীয় না — এটাই Conway's Law, আর microservice-এর সীমা টানার প্রশ্নটাও হুবহু একই প্রশ্ন।
